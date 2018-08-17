@@ -1,3 +1,10 @@
+/*
+ * @Author: daer
+ * @Date: 2018-08-17 21:39:55
+ * @Last Modified by:   daer
+ * @Last Modified time: 2018-08-17 21:39:55
+ */
+
 export const NODE_TYPES = {
   ELEM: 1,
   ATTR: 2,
