@@ -95,10 +95,10 @@ class Parser {
   }
 
   checkAttrName(elemName: string) {
-    if (/^[a-zA-Z$-][\w-$]*$/.test(elemName)) {
+    if (/^[a-zA-Z$-_:][\w-$:]*$/.test(elemName)) {
       return true;
     }
-    throw new Error('Invalid element name!');
+    throw new Error('Invalid attribute name!');
   }
 
 
@@ -218,6 +218,7 @@ class Parser {
               this.emit('attributeName', this.current);
               this.state = State.attrNameEnd;
               this.current = '';
+              this.feed(-1);
               break;
             }
 
@@ -226,6 +227,7 @@ class Parser {
               continue;
             }
           }
+          continue;
         }
       }
 
@@ -240,19 +242,24 @@ class Parser {
           continue;
         }
 
-        if (char === '/') {
-          this.state = State.elemSelfClosing;
-          continue;
-        }
-
+        // boolean attribute
         if (char === '>') {
+          this.emit('attributeValue', null);
           this.state = State.elemOpenEnd;
           continue;
         }
 
         // boolean attribute
+        if (char === '/') {
+          this.emit('attributeValue', null);
+          this.state = State.elemSelfClosing;
+          continue;
+        }
+
+        // boolean attribute: any other char
         this.emit('attributeValue', null);
         this.state = State.attrNameStart;
+        this.feed(-1);
         continue;
       }
 
@@ -287,6 +294,7 @@ class Parser {
         this.emit('attributeValue', this.current);
         this.current = '';
         this.state = State.attrNameStart;
+        continue;
       }
 
       // attrLeftDQuotes
@@ -299,7 +307,7 @@ class Parser {
         this.emit('attributeValue', this.current);
         this.current = '';
         this.state = State.attrNameStart;
-
+        continue;
       }
 
       // elemSelfClosing
@@ -328,6 +336,7 @@ class Parser {
         }
 
         this.state = State.text;
+        this.feed(-1);
         continue;
       }
 
@@ -353,8 +362,8 @@ class Parser {
 
         // < / >
         if (char === '>') {
-          throw new Error('Empty close tag!');
-          console.error('Empty close tag!');
+          throw new Error('Empty close element!');
+          console.error('Empty close element!');
         }
 
         while (char !== '>' && this.index < len) {
@@ -367,11 +376,12 @@ class Parser {
           this.state = State.elemCloseEnd;
           continue;
         } else {
-          throw new Error('Can not match close tag!');
-          console.error('Can not match close tag!');
+          throw new Error('Can not match close element!');
+          console.error('Can not match close element!');
         }
       }
-      // console.error('Do not!');
+
+      console.error('Can not be here!');
     }
 
 
