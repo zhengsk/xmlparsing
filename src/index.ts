@@ -168,6 +168,11 @@ class Parser {
           continue;
         }
 
+        // comment element
+        if (char === '!') {
+          // comment support @TODO
+        }
+
         if (this.checkElemName(char)) {
           this.state = State.elemOpen;
           this.current = char;
