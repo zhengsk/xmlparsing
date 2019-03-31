@@ -32,23 +32,89 @@ var State;
     // blank
     State[State["blank"] = 19] = "blank";
 })(State || (State = {}));
-var Parser = /** @class */ (function () {
-    function Parser() {
+var Location = /** @class */ (function () {
+    function Location() {
         this.index = -1;
         this.row = -1;
         this.column = -1;
+    }
+    return Location;
+}());
+var Parser = /** @class */ (function () {
+    function Parser(str) {
+        this.str = '';
+        this.index = -1;
+        this.row = -1;
+        this.column = -1;
+        this._rowsSize = []; // every line length
         this.current = '';
         this.elemStack = [];
         this.state = State.Uninit;
+        this.str = str;
     }
     Parser.prototype.emit = function (eventName, args) {
         console.info(eventName, ':', args);
     };
-    Parser.prototype.parse = function (str) {
-        var len = str.length;
-        while (++this.index < len) {
-            var char = str[this.index];
+    Parser.prototype.isLineBreak = function (char) {
+        if (char === '\n') { // @TODO \r\n
+            return true;
+        }
+        return false;
+    };
+    Parser.prototype.isEmptyChar = function (char) {
+        return /[\s\t]/.test(char);
+    };
+    Parser.prototype.feed = function (size) {
+        if (size === void 0) { size = 1; }
+        if (size > 0) {
+            for (var i = 1; i <= size; i++) {
+                this.index += 1;
+                var char = this.str[this.index];
+                if (this.isLineBreak(char)) {
+                    this._rowsSize.push(this.column);
+                    this.column = 0;
+                    ++this.row;
+                }
+                else {
+                    ++this.column;
+                }
+            }
+        }
+        if (size < 0) {
+            for (var i = -1; i >= size; i--) {
+                this.index -= 1;
+                var char = this.str[this.index];
+                if (this.isLineBreak(char)) {
+                    this.column = this._rowsSize.pop() || 0;
+                    --this.row;
+                }
+                else {
+                    --this.column;
+                }
+            }
+        }
+        return this.str[this.index];
+    };
+    Parser.prototype.parse = function () {
+        var len = this.str.length;
+        while (this.index < len) {
+            var char = this.feed();
             // console.info(char);
+            if (this.state === State.Uninit && char !== '<') {
+                this.state = State.text;
+                this.current = char;
+                while (this.index < len) {
+                    char = this.feed();
+                    if (char === '<') {
+                        this.emit('text', this.current);
+                        this.feed(-1);
+                        break;
+                    }
+                    this.current += char;
+                }
+                continue;
+            }
+            // <
             if (char === '<') {
                 if (this.state === State.Uninit) {
                     this.state = State.elemOpenBegin;
@@ -56,34 +122,33 @@ var Parser = /** @class */ (function () {
                 }
                 if (this.state === State.elemOpenEnd) {
                     this.state = State.elemOpenBegin;
+                    continue;
                 }
             }
+            // >
             if (char === '>') {
                 if (this.state === State.attrNameStart) {
                     this.state = State.elemOpenEnd;
                     this.emit('elementOpenEnd', this.elemStack[this.elemStack.length - 1]);
                     this.current = '';
-                    while (++this.index < len) {
-                        char = str[this.index];
+                    while (this.index < len) {
+                        char = this.feed();
                         if (char !== '<') {
                             this.current += char;
                         }
                         else {
-                            this.emit('text', this.current);
-                            --this.index;
+                            if (this.current.length) {
+                                this.emit('text', this.current);
+                                this.current = '';
+                            }
+                            this.feed(-1);
                             break;
                         }
                     }
                     continue;
                 }
-                if (this.state === State.elemClose) {
-                    if (this.current !== this.elemStack[this.elemStack.length - 1]) {
-                        this.emit('error', "No close element: " + this.current);
-                    }
-                    this.emit('elementEnd', this.current);
-                    this.current = '';
-                }
             }
+            // =
             if (char === '=') {
                 if (this.state === State.attrName) {
                     this.emit('attributeName', this.current);
@@ -96,6 +161,7 @@ var Parser = /** @class */ (function () {
                     continue;
                 }
             }
+            // "
             if (char === '"') {
                 if (this.state === State.attrValueStart) {
                     this.state = State.attrLeftDQuotes;
@@ -108,6 +174,7 @@ var Parser = /** @class */ (function () {
                     continue;
                 }
             }
+            // '
             if (char === '\'') {
                 if (this.state === State.attrValueStart) {
                     this.state = State.attrLeftSQuotes;
@@ -120,10 +187,23 @@ var Parser = /** @class */ (function () {
                     continue;
                 }
             }
+            // /
             if (char === '/') {
                 if (this.state === State.elemOpenBegin) {
                     this.state = State.elemCloseBegin;
                     this.current = '';
+                    while (this.index < len) {
+                        char = this.feed();
+                        if (char === '>') {
+                            this.emit('elementClose', this.current);
+                            this.current = '';
+                            this.state = State.elemCloseEnd;
+                            break;
+                        }
+                        if (!this.isEmptyChar(char)) {
+                            this.current += char;
+                        }
+                    }
                     continue;
                 }
             }
@@ -153,6 +233,7 @@ var Parser = /** @class */ (function () {
                     continue;
                 }
             }
+            // others
             if (/[a-zA-Z-./:]/.test(char)) {
                 if (this.state === State.elemOpenBegin) {
                     this.state = State.elemOpen;
@@ -177,16 +258,12 @@ var Parser = /** @class */ (function () {
                     this.current += char;
                     continue;
                 }
-                if (this.state === State.elemCloseBegin || this.state === State.elemClose) {
-                    this.state = State.elemClose;
-                    this.current += char;
-                }
             }
             // console.error('Do not!');
         }
     };
     return Parser;
 }());
-var parser = new Parser();
-parser.parse(xmlStr);
+var parser = new Parser(xmlStr);
+parser.parse();
 //# sourceMappingURL=index.js.map

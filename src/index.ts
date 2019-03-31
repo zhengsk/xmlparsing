@@ -37,28 +37,101 @@ enum State {
   // blank
   blank,
 }
-class Parser {
+
+class Location {
   index: number = -1;
   row: number = -1;
   column: number = -1;
+}
+
+class Parser {
+  str: string = '';
+
+  index: number = -1;
+  row: number = -1;
+  column: number = -1;
+
+  _rowsSize: number[] = []; // every line length
+
   current: string = '';
   elemStack: string[] = [];
 
   state: State = State.Uninit;
 
-  constructor() {
-
+  constructor(str: string) {
+    this.str = str;
   }
 
   emit(eventName: string, args?: any) {
     console.info(eventName, ':', args);
   }
 
-  parse(str: string): void {
-    const len: number = str.length;
-    while (++this.index < len) {
-      var char = str[this.index];
+  isLineBreak(char: string) {
+    if (char === '\n') { // @TODO \r\n
+      return true;
+    }
+    return false;
+  }
+
+  isEmptyChar(char: string) {
+    return /[\s\t]/.test(char);
+  }
+
+  feed(size: number = 1): string {
+    if (size > 0) {
+      for (let i = 1; i <= size; i++) {
+        this.index += 1;
+        const char = this.str[this.index];
+        if (this.isLineBreak(char)) {
+          this._rowsSize.push(this.column);
+          this.column = 0;
+          ++this.row;
+        } else {
+          ++this.column
+        }
+      }
+    }
+
+    if (size < 0) {
+      for (let i = -1; i >= size; i--) {
+        this.index -= 1;
+        const char = this.str[this.index];
+        if (this.isLineBreak(char)) {
+          this.column = this._rowsSize.pop() || 0;
+          --this.row;
+        } else {
+          --this.column
+        }
+      }
+    }
+
+    return this.str[this.index];
+  }
+
+
+  parse(): void {
+    const len: number = this.str.length;
+    while (this.index < len) {
+      let char = this.feed();
       // console.info(char);
+
+      if (this.state === State.Uninit && char !== '<') {
+        this.state = State.text;
+        this.current = char;
+
+        while (this.index < len) {
+          char = this.feed();
+          if (char === '<') {
+            this.emit('text', this.current);
+            this.feed(-1);
+            break;
+          }
+          this.current += char;
+        }
+        continue;
+      }
+
+      // <
       if (char === '<') {
         if (this.state === State.Uninit) {
           this.state = State.elemOpenBegin;
@@ -66,37 +139,36 @@ class Parser {
         }
 
         if (this.state === State.elemOpenEnd) {
-          this.state = State.elemOpenBegin
+          this.state = State.elemOpenBegin;
+          continue;
         }
       }
+
+      // >
       if (char === '>') {
         if (this.state === State.attrNameStart) {
           this.state = State.elemOpenEnd;
           this.emit('elementOpenEnd', this.elemStack[this.elemStack.length - 1]);
           this.current = '';
 
-          while (++this.index < len) {
-            char = str[this.index];
+          while (this.index < len) {
+            char = this.feed();
             if (char !== '<') {
               this.current += char;
             } else {
-              this.emit('text', this.current);
-              --this.index;
+              if (this.current.length) {
+                this.emit('text', this.current);
+                this.current = '';
+              }
+              this.feed(-1);
               break;
             }
           }
           continue;
         }
-
-        if (this.state === State.elemClose) {
-          if (this.current !== this.elemStack[this.elemStack.length - 1]) {
-            this.emit('error', `No close element: ${this.current}`);
-          }
-          this.emit('elementEnd', this.current);
-          this.current = '';
-        }
       }
 
+      // =
       if (char === '=') {
         if (this.state === State.attrName) {
           this.emit('attributeName', this.current);
@@ -110,6 +182,7 @@ class Parser {
         }
       }
 
+      // "
       if (char === '"') {
         if (this.state === State.attrValueStart) {
           this.state = State.attrLeftDQuotes;
@@ -124,6 +197,7 @@ class Parser {
         }
       }
 
+      // '
       if (char === '\'') {
         if (this.state === State.attrValueStart) {
           this.state = State.attrLeftSQuotes;
@@ -138,10 +212,24 @@ class Parser {
         }
       }
 
+      // /
       if (char === '/') {
         if (this.state === State.elemOpenBegin) {
           this.state = State.elemCloseBegin;
           this.current = '';
+
+          while (this.index < len) {
+            char = this.feed();
+            if (char === '>') {
+              this.emit('elementClose', this.current);
+              this.current = '';
+              this.state = State.elemCloseEnd;
+              break;
+            }
+            if (!this.isEmptyChar(char)) {
+              this.current += char;
+            }
+          }
           continue;
         }
       }
@@ -174,6 +262,7 @@ class Parser {
         }
       }
 
+      // others
       if (/[a-zA-Z-./:]/.test(char)) {
         if (this.state === State.elemOpenBegin) {
           this.state = State.elemOpen;
@@ -200,15 +289,11 @@ class Parser {
           continue;
         }
 
-        if (this.state === State.elemCloseBegin || this.state === State.elemClose) {
-          this.state = State.elemClose;
-          this.current += char;
-        }
       }
       // console.error('Do not!');
     }
   }
 }
 
-const parser = new Parser();
-parser.parse(xmlStr);
+const parser = new Parser(xmlStr);
+parser.parse();
