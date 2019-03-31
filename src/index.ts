@@ -286,7 +286,7 @@ class Parser {
 
       // attrLeftSQuotes
       if (this.state === State.attrLeftSQuotes) {
-        if (char !== "'") {
+        if (char !== "'" || this.current[this.current.length - 1] === '\\') {
           this.current += char;
           continue;
         }
@@ -299,7 +299,7 @@ class Parser {
 
       // attrLeftDQuotes
       if (this.state === State.attrLeftDQuotes) {
-        if (char !== '"') {
+        if (char !== '"' || this.current[this.current.length - 1] === '\\') {
           this.current += char;
           continue;
         }
