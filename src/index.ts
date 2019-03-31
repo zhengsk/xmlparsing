@@ -60,6 +60,8 @@ class Parser {
 
   state: State = State.elemCloseEnd;
 
+  textNode: string[] = ['script', 'style'];
+
   constructor(str: string) {
     this.str = str;
   }
@@ -333,6 +335,28 @@ class Parser {
         if (char === "<") {
           this.state = State.elemOpenStart;
           continue;
+        }
+
+        // TextNode
+        const element = this.elemStack[this.elemStack.length - 1];
+        if (this.textNode.includes(element)) {
+          this.current = char;
+          const reg = new RegExp(`<\\s*/\\s*${element}\\s*>$`);
+          while (!reg.test(this.current)) {
+            char = this.feed();
+            this.current += char;
+          }
+          let lastTag = '';
+          this.current = this.current.replace(reg, tag => {
+            lastTag = tag;
+            return '';
+          })
+          this.feed(-lastTag.length + 1);
+          if (this.current.length) {
+            this.emit('text', this.current);
+          }
+          this.state = State.elemOpenStart;
+          continue
         }
 
         this.state = State.text;
