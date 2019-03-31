@@ -6,11 +6,13 @@ enum State {
   Uninit,
 
   // element
-  elemOpenBegin, // <
+  elemOpenStart, // <
   elemOpen,
   elemOpenEnd, // >
 
-  elemCloseBegin, // < || /
+  elemSelfClosing, // /
+
+  elemCloseStart, // < || /
   elemClose,
   elemCloseEnd, // >
 
@@ -56,7 +58,7 @@ class Parser {
   current: string = '';
   elemStack: string[] = [];
 
-  state: State = State.Uninit;
+  state: State = State.elemCloseEnd;
 
   constructor(str: string) {
     this.str = str;
@@ -74,8 +76,32 @@ class Parser {
   }
 
   isEmptyChar(char: string) {
-    return /[\s\t]/.test(char);
+    return /[\s\t\n]/.test(char);
   }
+
+  checkWord(char: string): boolean {
+    if (/\w/.test(char)) {
+      return true;
+    } else {
+      throw new Error('Not valid element name or attribute name!');
+    }
+  }
+
+  checkElemName(elemName: string): boolean {
+    if (/^[a-zA-Z$-][\w-$]*$/.test(elemName)) {
+      return true;
+    }
+    throw new Error('Invalid element name!');
+  }
+
+  checkAttrName(elemName: string) {
+    if (/^[a-zA-Z$-][\w-$]*$/.test(elemName)) {
+      return true;
+    }
+    throw new Error('Invalid element name!');
+  }
+
+
 
   feed(size: number = 1): string {
     if (size > 0) {
@@ -115,183 +141,240 @@ class Parser {
       let char = this.feed();
       // console.info(char);
 
-      if (this.state === State.Uninit && char !== '<') {
-        this.state = State.text;
+      // elemCloseEnd
+      if (this.state === State.elemCloseEnd) {
         this.current = char;
 
-        while (this.index < len) {
-          char = this.feed();
-          if (char === '<') {
-            this.emit('text', this.current);
-            this.feed(-1);
-            break;
-          }
-          this.current += char;
+        if (char === '<') {
+          this.state = State.elemOpenStart;
+          continue;
         }
+
+        this.state = State.text;
         continue;
       }
 
-      // <
-      if (char === '<') {
-        if (this.state === State.Uninit) {
-          this.state = State.elemOpenBegin;
+      // elemOpenStart: <
+      if (this.state === State.elemOpenStart) {
+        if (this.isEmptyChar(char)) {
           continue;
         }
 
-        if (this.state === State.elemOpenEnd) {
-          this.state = State.elemOpenBegin;
-          continue;
-        }
-      }
-
-      // >
-      if (char === '>') {
-        if (this.state === State.attrNameStart) {
-          this.state = State.elemOpenEnd;
-          this.emit('elementOpenEnd', this.elemStack[this.elemStack.length - 1]);
+        if (char === '/') {
+          this.state = State.elemCloseStart;
           this.current = '';
-
-          while (this.index < len) {
-            char = this.feed();
-            if (char !== '<') {
-              this.current += char;
-            } else {
-              if (this.current.length) {
-                this.emit('text', this.current);
-                this.current = '';
-              }
-              this.feed(-1);
-              break;
-            }
-          }
-          continue;
-        }
-      }
-
-      // =
-      if (char === '=') {
-        if (this.state === State.attrName) {
-          this.emit('attributeName', this.current);
-          this.current = '';
-          this.state = State.attrValueStart;
-          continue;
-        }
-        if (this.state === State.attrNameEnd) {
-          this.state = State.attrValueStart;
-          continue;
-        }
-      }
-
-      // "
-      if (char === '"') {
-        if (this.state === State.attrValueStart) {
-          this.state = State.attrLeftDQuotes;
           continue;
         }
 
-        if (this.state === State.attrValue || this.state === State.attrLeftDQuotes) {
-          this.emit('attributeValue', this.current);
-          this.current = '';
-          this.state = State.attrNameStart;
-          continue;
-        }
-      }
-
-      // '
-      if (char === '\'') {
-        if (this.state === State.attrValueStart) {
-          this.state = State.attrLeftSQuotes;
-          continue;
-        }
-
-        if (this.state === State.attrValue || this.state === State.attrLeftSQuotes) {
-          this.emit('attributeValue', this.current);
-          this.current = '';
-          this.state = State.attrNameStart;
-          continue;
-        }
-      }
-
-      // /
-      if (char === '/') {
-        if (this.state === State.elemOpenBegin) {
-          this.state = State.elemCloseBegin;
-          this.current = '';
-
-          while (this.index < len) {
-            char = this.feed();
-            if (char === '>') {
-              this.emit('elementClose', this.current);
-              this.current = '';
-              this.state = State.elemCloseEnd;
-              break;
-            }
-            if (!this.isEmptyChar(char)) {
-              this.current += char;
-            }
-          }
-          continue;
-        }
-      }
-
-      // blank char
-      if (/[\s\t\n\r]/.test(char)) {
-        if (this.state === State.elemOpen) {
-          this.emit('elementOpenStart', this.current);
-          this.elemStack.push(this.current);
-          this.current = '';
-          this.state = State.attrNameStart;
-          continue;
-        }
-        if (this.state === State.attrNameStart || this.state === State.attrValueStart) {
-          continue;
-        }
-        if (this.state === State.attrName) {
-          this.emit('attributeName', this.current);
-          this.current = '';
-          this.state = State.attrNameEnd;
-          continue;
-        }
-        if (this.state === State.attrNameEnd) {
-          continue;
-        }
-
-        if (this.state === State.attrLeftDQuotes || this.state === State.attrLeftSQuotes) {
-          this.current += char;
-          continue;
-        }
-      }
-
-      // others
-      if (/[a-zA-Z-./:]/.test(char)) {
-        if (this.state === State.elemOpenBegin) {
+        if (this.checkElemName(char)) {
           this.state = State.elemOpen;
           this.current = char;
+
+          while (this.index < len) {
+            char = this.feed();
+            // <a ...> or <a/> or <a>
+            if (this.isEmptyChar(char) || char === '/' || char === '>') {
+              this.elemStack.push(this.current);
+              this.emit('elementOpen', this.current);
+              this.current = '';
+              this.state = State.attrNameStart;
+              break;
+            }
+
+            if (this.checkElemName(this.current + char)) {
+              this.current += char;
+              continue;
+            }
+          }
+        }
+      }
+
+      // attrNameStart
+      if (this.state === State.attrNameStart) {
+        if (this.isEmptyChar(char)) {
           continue;
         }
-        if (this.state === State.elemOpen || this.state === State.attrName) {
-          this.current += char;
+
+        if (char === '>') {
+          this.state = State.elemOpenEnd;
+          this.current = '';
           continue;
         }
-        if (this.state === State.attrNameStart) {
+
+        if (char === '/') {
+          this.state = State.elemSelfClosing;
+          this.current = '';
+          continue;
+        }
+
+        if (this.checkAttrName(char)) {
           this.state = State.attrName;
-          this.current += char;
-          continue;
-        }
-        if (this.state === State.attrLeftDQuotes || this.state === State.attrLeftSQuotes) {
-          this.state = State.attrValue;
           this.current = char;
+
+          while (this.index < len) {
+            char = this.feed();
+            // <a mn ...> or <a mn= ...> or <a mn/> or <a mn>
+            if (this.isEmptyChar(char) || ['=', '/', '>'].includes(char)) {
+              this.emit('attributeName', this.current);
+              this.state = State.attrNameEnd;
+              this.current = '';
+              break;
+            }
+
+            if (this.checkAttrName(this.current + char)) {
+              this.current += char;
+              continue;
+            }
+          }
+        }
+      }
+
+      // attrNameEnd
+      if (this.state === State.attrNameEnd) {
+        if (this.isEmptyChar(char)) {
           continue;
         }
 
-        if (this.state === State.attrValue) {
+        if (char === '=') {
+          this.state = State.attrEqual;
+          continue;
+        }
+
+        if (char === '/') {
+          this.state = State.elemSelfClosing;
+          continue;
+        }
+
+        if (char === '>') {
+          this.state = State.elemOpenEnd;
+          continue;
+        }
+
+        // boolean attribute
+        this.emit('attributeValue', null);
+        this.state = State.attrNameStart;
+        continue;
+      }
+
+      // attrEqual
+      if (this.state === State.attrEqual) {
+        if (this.isEmptyChar(char)) {
+          continue;
+        }
+
+        if (char === '\'') {
+          this.state = State.attrLeftSQuotes;
+          this.current = '';
+          continue
+        }
+
+        if (char === '"') {
+          this.state = State.attrLeftDQuotes;
+          continue
+        }
+
+        throw new Error('Invalid attribute value!');
+        console.error('Invalid attribute value!');
+      }
+
+      // attrLeftSQuotes
+      if (this.state === State.attrLeftSQuotes) {
+        if (char !== "'") {
           this.current += char;
           continue;
         }
 
+        this.emit('attributeValue', this.current);
+        this.current = '';
+        this.state = State.attrNameStart;
+      }
+
+      // attrLeftDQuotes
+      if (this.state === State.attrLeftDQuotes) {
+        if (char !== '"') {
+          this.current += char;
+          continue;
+        }
+
+        this.emit('attributeValue', this.current);
+        this.current = '';
+        this.state = State.attrNameStart;
+
+      }
+
+      // elemSelfClosing
+      if (this.state === State.elemSelfClosing) {
+        if (this.isEmptyChar(char)) {
+          continue;
+        }
+
+        if (char === '>') {
+          const element = this.elemStack.pop();
+          this.emit('elementClose', element);
+          this.state = State.elemCloseEnd;
+          continue;
+        }
+
+        throw new Error('Invalid char in self-closing element!');
+        console.error('Invalid char in self-closing element!');
+      }
+
+
+      // elemOpenEnd
+      if (this.state === State.elemOpenEnd) {
+        if (char === "<") {
+          this.state = State.elemOpenStart;
+          continue;
+        }
+
+        this.state = State.text;
+        continue;
+      }
+
+      // text
+      if (this.state === State.text) {
+        this.current = '';
+        while (char !== '<' && this.index < len) {
+          this.current += char;
+          char = this.feed();
+        }
+        if (this.current.length) {
+          this.emit('text', this.current);
+        }
+        this.state = State.elemOpenStart;
+        continue
+      }
+
+      // elemCloseStart: /
+      if (this.state === State.elemCloseStart) {
+        if (this.isEmptyChar(char)) {
+          continue;
+        }
+
+        // < / >
+        if (char === '>') {
+          throw new Error('Empty close tag!');
+          console.error('Empty close tag!');
+        }
+
+        while (char !== '>' && this.index < len) {
+          this.current += char;
+          char = this.feed();
+        }
+        const element = this.elemStack.pop();
+        if (element === this.current) {
+          this.emit('elementClose', element);
+          this.state = State.elemCloseEnd;
+          continue;
+        } else {
+          throw new Error('Can not match close tag!');
+          console.error('Can not match close tag!');
+        }
       }
       // console.error('Do not!');
     }
+
+
   }
 }
 
