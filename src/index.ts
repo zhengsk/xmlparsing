@@ -3,18 +3,17 @@ import fs from 'fs';
 const xmlStr: string = fs.readFileSync('./src/template', 'utf8');
 
 enum State {
-  Uninit,
+  // text
+  text,
 
   // element
   elemOpenStart, // <
-  elemOpen,
   elemOpenEnd, // >
 
   elemSelfClosing, // /
 
   elemCloseStart, // < || /
   elemClose,
-  elemCloseEnd, // >
 
   // attribute
   attrNameStart,
@@ -35,12 +34,6 @@ enum State {
 
   // comment: <!
   comment,
-
-  // text
-  text,
-
-  // blank
-  blank,
 }
 
 class Location {
@@ -61,7 +54,7 @@ class Parser {
   current: string = '';
   elemStack: string[] = [];
 
-  state: State = State.elemCloseEnd;
+  state: State = State.text;
 
   textNode: string[] = ['script', 'style'];
 
@@ -146,17 +139,18 @@ class Parser {
       let char = this.feed();
       // console.info(char);
 
-      // elemCloseEnd
-      if (this.state === State.elemCloseEnd) {
-        this.current = char;
-
-        if (char === '<') {
-          this.state = State.elemOpenStart;
-          continue;
+      // text
+      if (this.state === State.text) {
+        this.current = '';
+        while (char !== '<' && this.index < maxIndex) {
+          this.current += char;
+          char = this.feed();
         }
-
-        this.state = State.text;
-        continue;
+        if (this.current.length) {
+          this.emit('text', this.current);
+        }
+        this.state = State.elemOpenStart;
+        continue
       }
 
       // elemOpenStart: <
@@ -167,7 +161,6 @@ class Parser {
 
         if (char === '/') {
           this.state = State.elemCloseStart;
-          this.current = '';
           continue;
         }
 
@@ -200,7 +193,6 @@ class Parser {
         }
 
         if (this.checkElemName(char)) {
-          this.state = State.elemOpen;
           this.current = char;
 
           while (this.index < maxIndex) {
@@ -208,17 +200,19 @@ class Parser {
             // <a ...> or <a/> or <a>
             if (this.isEmptyChar(char) || char === '/' || char === '>') {
               this.elemStack.push(this.current);
+              this.feed(-1);
               this.emit('elementOpen', this.current);
               this.current = '';
               this.state = State.attrNameStart;
               break;
             }
 
-            if (this.checkElemName(this.current + char)) {
-              this.current += char;
+            this.current += char;
+            if (this.checkElemName(this.current)) {
               continue;
             }
           }
+          continue;
         }
       }
 
@@ -246,17 +240,18 @@ class Parser {
 
           while (this.index < maxIndex) {
             char = this.feed();
+
             // <a mn ...> or <a mn= ...> or <a mn/> or <a mn>
             if (this.isEmptyChar(char) || ['=', '/', '>'].includes(char)) {
-              this.emit('attributeName', this.current);
-              this.state = State.attrNameEnd;
-              this.current = '';
               this.feed(-1);
+              this.emit('attributeName', this.current);
+              this.current = '';
+              this.state = State.attrNameEnd;
               break;
             }
 
-            if (this.checkAttrName(this.current + char)) {
-              this.current += char;
+            this.current += char;
+            if (this.checkAttrName(this.current)) {
               continue;
             }
           }
@@ -290,7 +285,7 @@ class Parser {
         }
 
         // boolean attribute: any other char
-        this.emit('attributeValue', null);
+        this.emit('attributeValue', null); // @TODO wrong index location
         this.state = State.attrNameStart;
         this.feed(-1);
         continue;
@@ -351,8 +346,8 @@ class Parser {
 
         if (char === '>') {
           const element = this.elemStack.pop();
-          this.emit('elementClose', element);
-          this.state = State.elemCloseEnd;
+          this.emit('elementClose', element); // selfClosing
+          this.state = State.text;
           continue;
         }
 
@@ -395,20 +390,6 @@ class Parser {
         continue;
       }
 
-      // text
-      if (this.state === State.text) {
-        this.current = '';
-        while (char !== '<' && this.index < maxIndex) {
-          this.current += char;
-          char = this.feed();
-        }
-        if (this.current.length) {
-          this.emit('text', this.current);
-        }
-        this.state = State.elemOpenStart;
-        continue
-      }
-
       // elemCloseStart: /
       if (this.state === State.elemCloseStart) {
         if (this.isEmptyChar(char)) {
@@ -421,14 +402,17 @@ class Parser {
           console.error('Empty close element!');
         }
 
+        this.current = '';
         while (char !== '>' && this.index < maxIndex) {
           this.current += char;
-          char = this.feed();
+          if (this.checkElemName(this.current)){
+            char = this.feed();
+          }
         }
         const element = this.elemStack.pop();
         if (element === this.current) {
           this.emit('elementClose', element);
-          this.state = State.elemCloseEnd;
+          this.state = State.text;
           continue;
         } else {
           throw new Error('Can not match close element!');
