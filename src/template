@@ -1,1 +1,8 @@
-<!-->
+<!-- abc -->
+<import src="/components/wxParse/wxParse.wxml" xyz dd />
+<import src="/components/templates/templates.wxml"/>
+<view class="app" hidden="{{page_hidden}}">
+  <view style="width:100%;height:130rpx;overflow:hidden;margin-top:10px;">
+    <image style="width:100%;height:100%;" src="http://cdn.jisuapp.cn/zhichi_frontend/static/webapp/images/tec-support-new.png" mode="aspectFill"></image>
+  </view>
+</view>
