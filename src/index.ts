@@ -33,6 +33,9 @@ enum State {
   attrValue,
   attrValueEnd,
 
+  // comment: <!
+  comment,
+
   // text
   text,
 
@@ -138,8 +141,8 @@ class Parser {
 
 
   parse(): void {
-    const len: number = this.str.length;
-    while (this.index < len) {
+    const maxIndex: number = this.str.length - 1;
+    while (this.index < maxIndex) {
       let char = this.feed();
       // console.info(char);
 
@@ -168,16 +171,39 @@ class Parser {
           continue;
         }
 
-        // comment element
+        // comment element: <!
         if (char === '!') {
-          // comment support @TODO
+          this.current += char; // <!
+          const dashOne = this.feed(); // <!-
+          const dashTwo = this.feed(); // <!--
+          if(dashOne === '-' && dashTwo === '-') {
+            // Comment start
+            this.current += dashOne + dashTwo;
+            this.state = State.comment;
+
+            this.current = '';
+            const reg = new RegExp(`-->$`);
+            while (!reg.test(this.current) && this.index < maxIndex) { // @TODO to be optimize
+              char = this.feed();
+              this.current += char;
+            }
+            this.current = this.current.replace(reg, '');
+            this.emit('comment', this.current);
+            this.state = State.text;
+            continue;
+
+          } else {
+            throw new Error('Invalid element name!');
+            console.error('Invalid element name!');
+          }
+
         }
 
         if (this.checkElemName(char)) {
           this.state = State.elemOpen;
           this.current = char;
 
-          while (this.index < len) {
+          while (this.index < maxIndex) {
             char = this.feed();
             // <a ...> or <a/> or <a>
             if (this.isEmptyChar(char) || char === '/' || char === '>') {
@@ -218,7 +244,7 @@ class Parser {
           this.state = State.attrName;
           this.current = char;
 
-          while (this.index < len) {
+          while (this.index < maxIndex) {
             char = this.feed();
             // <a mn ...> or <a mn= ...> or <a mn/> or <a mn>
             if (this.isEmptyChar(char) || ['=', '/', '>'].includes(char)) {
@@ -347,7 +373,7 @@ class Parser {
         if (this.textNode.includes(element)) {
           this.current = char;
           const reg = new RegExp(`<\\s*/\\s*${element}\\s*>$`);
-          while (!reg.test(this.current)) {
+          while (!reg.test(this.current) && this.index < maxIndex) { // @TODO to be optimize
             char = this.feed();
             this.current += char;
           }
@@ -372,7 +398,7 @@ class Parser {
       // text
       if (this.state === State.text) {
         this.current = '';
-        while (char !== '<' && this.index < len) {
+        while (char !== '<' && this.index < maxIndex) {
           this.current += char;
           char = this.feed();
         }
@@ -395,7 +421,7 @@ class Parser {
           console.error('Empty close element!');
         }
 
-        while (char !== '>' && this.index < len) {
+        while (char !== '>' && this.index < maxIndex) {
           this.current += char;
           char = this.feed();
         }
