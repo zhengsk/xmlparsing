@@ -12,7 +12,7 @@ enum State {
 
   elemSelfClosing, // /
 
-  elemCloseStart, // < || /
+  elemCloseStart, // < or /
   elemClose,
 
   // attribute
@@ -27,10 +27,6 @@ enum State {
 
   attrLeftDQuotes, // "
   attrRightDQuotes, // "
-
-  attrValueStart,
-  attrValue,
-  attrValueEnd,
 
   // comment: <!
   comment,
