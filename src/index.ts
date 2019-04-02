@@ -311,25 +311,15 @@ class Parser {
         console.error('Invalid attribute value!');
       }
 
-      // attrLeftSQuotes
-      if (this.state === State.attrLeftSQuotes) {
-        let isEscape: boolean = false;
-        while ((char !== "'" || isEscape) && this.index < maxIndex) {
-          this.current += char;
-          isEscape = !isEscape && char === '\\';
-          char = this.feed();
-        }
+      // attrLeftSQuotes or attrLeftDQuotes
+      if (this.state === State.attrLeftSQuotes || this.state === State.attrLeftDQuotes) {
+        const quotes = {
+          [State.attrLeftSQuotes]: "'",
+          [State.attrLeftDQuotes]: '"'
+        }[this.state];
 
-        this.emit('attributeValue', this.current);
-        this.current = '';
-        this.state = State.attrNameStart;
-        continue;
-      }
-
-      // attrLeftDQuotes
-      if (this.state === State.attrLeftDQuotes) {
         let isEscape: boolean = false;
-        while ((char !== '"' || isEscape) && this.index < maxIndex) {
+        while ((char !== quotes || isEscape) && this.index < maxIndex) {
           this.current += char;
           isEscape = !isEscape && char === '\\';
           char = this.feed();
