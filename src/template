@@ -1,1 +1,2 @@
-<import src="b\"c\" />
+<import src="b\">c" />
+<import src='b\'c' />
