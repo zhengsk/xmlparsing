@@ -49,7 +49,7 @@ class Parser {
   row: number = -1;
   column: number = -1;
 
-  _rowsSize: number[] = []; // every line length
+  _rowsLength: number[] = []; // line length in each row
 
   current: string = '';
   elemStack: string[] = [];
@@ -86,7 +86,7 @@ class Parser {
   }
 
   checkElemName(elemName: string): boolean {
-    if (/^[a-zA-Z$-][\w-$]*$/.test(elemName)) {
+    if (/^[a-zA-Z$-][\w-$:]*$/.test(elemName)) {
       return true;
     }
     throw new Error('Invalid element name!');
@@ -107,7 +107,7 @@ class Parser {
         this.index += 1;
         const char = this.str[this.index];
         if (this.isLineBreak(char)) {
-          this._rowsSize.push(this.column);
+          this._rowsLength.push(this.column);
           this.column = 0;
           ++this.row;
         } else {
@@ -121,7 +121,7 @@ class Parser {
         this.index -= 1;
         const char = this.str[this.index];
         if (this.isLineBreak(char)) {
-          this.column = this._rowsSize.pop() || 0;
+          this.column = this._rowsLength.pop() || 0;
           --this.row;
         } else {
           --this.column
@@ -299,7 +299,6 @@ class Parser {
 
         if (char === '\'') {
           this.state = State.attrLeftSQuotes;
-          this.current = '';
           continue
         }
 
@@ -314,9 +313,11 @@ class Parser {
 
       // attrLeftSQuotes
       if (this.state === State.attrLeftSQuotes) {
-        if (char !== "'" || this.current[this.current.length - 1] === '\\') {
+        let isEscape: boolean = false;
+        while ((char !== "'" || isEscape) && this.index < maxIndex) {
           this.current += char;
-          continue;
+          isEscape = !isEscape && char === '\\';
+          char = this.feed();
         }
 
         this.emit('attributeValue', this.current);
@@ -327,9 +328,11 @@ class Parser {
 
       // attrLeftDQuotes
       if (this.state === State.attrLeftDQuotes) {
-        if (char !== '"' || this.current[this.current.length - 1] === '\\') {
+        let isEscape: boolean = false;
+        while ((char !== '"' || isEscape) && this.index < maxIndex) {
           this.current += char;
-          continue;
+          isEscape = !isEscape && char === '\\';
+          char = this.feed();
         }
 
         this.emit('attributeValue', this.current);
