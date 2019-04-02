@@ -160,7 +160,7 @@ class Parser {
           continue;
         }
 
-        // comment element: <!
+        // comment or CDATA element: <!
         if (char === '!') {
           this.current += char; // <!
           const dashOne = this.feed(); // <!-
@@ -181,11 +181,34 @@ class Parser {
             this.state = State.text;
             continue;
 
-          } else {
-            throw new Error('Invalid element name!');
-            console.error('Invalid element name!');
           }
 
+          // <![CDATA[  ... ]]>
+          const cdata = ("[CDATA[").split('');
+          if (dashOne === cdata[0] && dashTwo === cdata[1]) {
+            for (let i = 2; i < cdata.length; i++) {
+              if (this.index < maxIndex) {
+                char = this.feed();
+                if (char !== cdata[i]) {
+                  throw new Error('Unexpect character!');
+                  console.error('Unexpect character!');
+                }
+              }
+            }
+
+            // CDATA value string
+            this.current = '';
+            const reg = new RegExp(`]]>$`);
+            while (!reg.test(this.current) && this.index < maxIndex) { // @TODO to be optimize
+              char = this.feed();
+              this.current += char;
+            }
+            this.current = this.current.replace(reg, '');
+            this.emit('cdata', this.current);
+            this.state = State.text;
+            continue;
+          }
+          
         }
 
         if (this.checkElemName(char)) {
