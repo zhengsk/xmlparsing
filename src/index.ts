@@ -307,8 +307,25 @@ class Parser {
           continue
         }
 
-        throw new Error('Invalid attribute value!');
-        console.error('Invalid attribute value!');
+        while(this.index < maxIndex) {
+          if (char === '>') {
+            this.emit('attributeValue', this.current);
+            this.current = '';
+            this.state = State.text;
+            break;
+          }
+
+          if (this.isEmptyChar(char)) {
+            this.emit('attributeValue', this.current);
+            this.current = '';
+            this.state = State.attrNameStart;
+            break;
+          }
+          
+          this.current += char;
+          char = this.feed();
+        }
+        continue;
       }
 
       // attrLeftSQuotes or attrLeftDQuotes
