@@ -1,2 +1,6 @@
-<import src="b\">c" />
-<import src='b\'c' />
+<div>
+  abc
+  <![CDATA[ He
+  asdfasdf<ab/>asdf<sdd>llo, world! ]]>
+  <a />
+</div>
