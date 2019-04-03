@@ -62,16 +62,24 @@ export class Tokenizer {
     this.events = events;
   }
 
-  emit(eventName: EventNames, args?: any) {
+  emit(eventName: EventNames, opts: { element?: string, booleanValue?: boolean} = {}) {
     if (this.events[eventName]) {
-      this.events[eventName]!({
+      let data: EventValue = {
         index: this.index,
         column: this.column,
         row: this.row,
-        value: args || this.current,
-      })
+        value: this.current,
+      };
+
+      if (eventName === 'elementClose') {
+        data.value = opts!.element!;
+      } else if (eventName === 'attributeValue' && opts.booleanValue) {
+        data.value = null;
+      }
+
+      this.events[eventName]!(data)
     }
-    console.info(eventName, ':', args);
+    console.info(eventName, ':', this.current);
   }
 
   isLineBreak(char: string) {
@@ -155,7 +163,7 @@ export class Tokenizer {
           char = this.feed();
         }
         if (this.current.length) {
-          this.emit('text', this.current);
+          this.emit('text');
         }
         this.state = State.elemOpenStart;
         continue
@@ -189,7 +197,7 @@ export class Tokenizer {
               this.current += char;
             }
             this.current = this.current.replace(reg, '');
-            this.emit('comment', this.current);
+            this.emit('comment');
             this.state = State.text;
             continue;
 
@@ -216,7 +224,7 @@ export class Tokenizer {
               this.current += char;
             }
             this.current = this.current.replace(reg, '');
-            this.emit('cdata', this.current);
+            this.emit('cdata');
             this.state = State.text;
             continue;
           }
@@ -232,7 +240,7 @@ export class Tokenizer {
             if (this.isEmptyChar(char) || char === '/' || char === '>') {
               this.elemStack.push(this.current);
               this.feed(-1);
-              this.emit('elementOpen', this.current);
+              this.emit('elementOpen');
               this.current = '';
               this.state = State.attrNameStart;
               break;
@@ -275,7 +283,7 @@ export class Tokenizer {
             // <a mn ...> or <a mn= ...> or <a mn/> or <a mn>
             if (this.isEmptyChar(char) || ['=', '/', '>'].includes(char)) {
               this.feed(-1);
-              this.emit('attributeName', this.current);
+              this.emit('attributeName');
               this.current = '';
               this.state = State.attrNameEnd;
               break;
@@ -303,20 +311,20 @@ export class Tokenizer {
 
         // boolean attribute
         if (char === '>') {
-          this.emit('attributeValue', null);
+          this.emit('attributeValue', {booleanValue: true});
           this.state = State.elemOpenEnd;
           continue;
         }
 
         // boolean attribute
         if (char === '/') {
-          this.emit('attributeValue', null);
+          this.emit('attributeValue', {booleanValue: true});
           this.state = State.elemSelfClosing;
           continue;
         }
 
         // boolean attribute: any other char
-        this.emit('attributeValue', null); // @TODO wrong index location
+        this.emit('attributeValue', {booleanValue: true}); // @TODO wrong index location
         this.state = State.attrNameStart;
         this.feed(-1);
         continue;
@@ -342,7 +350,7 @@ export class Tokenizer {
         // support attribute value without quotes.
         if (this.attributeValueWithoutQuotes) {
           if (this.isEmptyChar(this.current)) {
-            this.emit('attributeValue', null);
+            this.emit('attributeValue', {booleanValue: true});
             this.current = '';
             this.state = State.attrNameStart;
             this.feed(-1);
@@ -351,21 +359,21 @@ export class Tokenizer {
 
           while(this.index < maxIndex) {
             if (char === '>') {
-              this.emit('attributeValue', this.current);
+              this.emit('attributeValue');
               this.current = '';
               this.state = State.text;
               break;
             }
   
             if (this.isEmptyChar(char)) {
-              this.emit('attributeValue', this.current);
+              this.emit('attributeValue');
               this.current = '';
               this.state = State.attrNameStart;
               break;
             }
 
             if (char === '/') {
-              this.emit('attributeValue', this.current);
+              this.emit('attributeValue');
               this.current = '';
               this.state = State.elemSelfClosing;
               break;
@@ -395,7 +403,7 @@ export class Tokenizer {
           char = this.feed();
         }
 
-        this.emit('attributeValue', this.current);
+        this.emit('attributeValue');
         this.current = '';
         this.state = State.attrNameStart;
         continue;
@@ -409,7 +417,7 @@ export class Tokenizer {
 
         if (char === '>') {
           const element = this.elemStack.pop();
-          this.emit('elementClose', element); // selfClosing
+          this.emit('elementClose', {element}); // selfClosing
           this.state = State.text;
           continue;
         }
@@ -442,7 +450,7 @@ export class Tokenizer {
           })
           this.feed(-lastTag.length + 1);
           if (this.current.length) {
-            this.emit('text', this.current);
+            this.emit('text');
           }
           this.state = State.elemOpenStart;
           continue
@@ -474,7 +482,7 @@ export class Tokenizer {
         }
         const element = this.elemStack.pop();
         if (element === this.current) {
-          this.emit('elementClose', element);
+          this.emit('elementClose', {element});
           this.state = State.text;
           continue;
         } else {

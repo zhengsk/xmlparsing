@@ -2,7 +2,7 @@ interface EventValue {
   index: number,
   column: number,
   row: number,
-  value: string,
+  value: null | string,
 }
 
 type EventNames = 'elementEnd' | 'elementStart' | 'text' | 'comment' | 'cdata' | 'elementOpen' | 'attributeName' | 'attributeValue' | 'elementClose';
