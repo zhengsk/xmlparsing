@@ -21,4 +21,21 @@ describe('Test', function() {
     });
     tokenizer.parse();
   }); 
+
+  it('Attribut without quotes', () => {
+    const tokenizer = new Tokenizer("<a href=33 />", {
+      attributeValue(token) {
+        expect(token.value).to.equal('33');
+      }
+    });
+    tokenizer.parse();
+
+    const tokenizer02 = new Tokenizer("<a href= 33 />", {
+      attributeValue(token) {
+        expect(token.value).to.equal(null);
+      }
+    });
+    tokenizer02.parse();
+  });
+   
 });
