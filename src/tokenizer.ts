@@ -55,6 +55,8 @@ export class Tokenizer {
 
   events: Events;
 
+  attributeValueWithoutQuotes: boolean = true;
+
   constructor(str: string, events: Events) {
     this.str = str;
     this.events = events;
@@ -334,6 +336,36 @@ export class Tokenizer {
         if (char === '"') {
           this.state = State.attrLeftDQuotes;
           continue
+        }
+
+        // support attribute value without quotes.
+        if (this.attributeValueWithoutQuotes) {
+          while(this.index < maxIndex) {
+            if (char === '>') {
+              this.emit('attributeValue', this.current);
+              this.current = '';
+              this.state = State.text;
+              break;
+            }
+  
+            if (this.isEmptyChar(char)) {
+              this.emit('attributeValue', this.current);
+              this.current = '';
+              this.state = State.attrNameStart;
+              break;
+            }
+
+            if (char === '/') {
+              this.emit('attributeValue', this.current);
+              this.current = '';
+              this.state = State.elemSelfClosing;
+              break;
+            }
+            
+            this.current += char;
+            char = this.feed();
+          }
+          continue;
         }
 
         throw new Error('Invalid attribute value!');
