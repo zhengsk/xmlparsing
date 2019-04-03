@@ -325,21 +325,30 @@ export class Tokenizer {
       // attrEqual
       if (this.state === State.attrEqual) {
         if (this.isEmptyChar(char)) {
+          this.current = char;
           continue;
         }
 
         if (char === '\'') {
           this.state = State.attrLeftSQuotes;
-          continue
+          continue;
         }
 
         if (char === '"') {
           this.state = State.attrLeftDQuotes;
-          continue
+          continue;
         }
 
         // support attribute value without quotes.
         if (this.attributeValueWithoutQuotes) {
+          if (this.isEmptyChar(this.current)) {
+            this.emit('attributeValue', null);
+            this.current = '';
+            this.state = State.attrNameStart;
+            this.feed(-1);
+            continue;
+          }
+
           while(this.index < maxIndex) {
             if (char === '>') {
               this.emit('attributeValue', this.current);
