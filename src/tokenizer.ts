@@ -1,15 +1,74 @@
-import fs from 'fs';
-import { Tokenizer } from './tokenizer';
+/// <reference path="./xmlparsing.d.ts" />
 
-const xmlStr: string = fs.readFileSync('./src/template', 'utf8');
+enum State {
+  // text
+  text,
 
-const tokenizer = new Tokenizer(xmlStr, {
-  elementClose: (stats) => {
-    // console.info(stats.token);
+  // element
+  elemOpenStart, // <
+  elemOpenEnd, // >
+
+  elemSelfClosing, // /
+
+  elemCloseStart, // < or /
+  elemClose,
+
+  // attribute
+  attrNameStart,
+  attrName,
+  attrNameEnd,
+
+  attrEqual, // =
+
+  attrLeftSQuotes, // '
+  attrRightSQuotes, // '
+
+  attrLeftDQuotes, // "
+  attrRightDQuotes, // "
+
+  // comment: <!
+  comment,
+}
+
+// class Location {
+//   index: number = -1;
+//   row: number = -1;
+//   column: number = -1;
+// }
+
+
+export class Tokenizer {
+  str: string = '';
+
+  index: number = -1;
+  row: number = -1;
+  column: number = -1;
+
+  _rowsLength: number[] = []; // line length in each row
+
+  current: string = '';
+  elemStack: string[] = [];
+
+  state: State = State.text;
+
+  textNode: string[] = ['script', 'style'];
+
+  events: Events;
+
+  constructor(str: string, events: Events) {
+    this.str = str;
+    this.events = events;
   }
-<<<<<<< Updated upstream
 
-  emit(eventName: string, args?: any) {
+  emit(eventName: EventNames, args?: any) {
+    if (this.events[eventName]) {
+      this.events[eventName]!({
+        index: this.index,
+        column: this.column,
+        row: this.row,
+        value: args || this.current,
+      })
+    }
     console.info(eventName, ':', args);
   }
 
@@ -111,7 +170,7 @@ const tokenizer = new Tokenizer(xmlStr, {
           continue;
         }
 
-        // comment element: <!
+        // comment or CDATA element: <!
         if (char === '!') {
           this.current += char; // <!
           const dashOne = this.feed(); // <!-
@@ -132,11 +191,34 @@ const tokenizer = new Tokenizer(xmlStr, {
             this.state = State.text;
             continue;
 
-          } else {
-            throw new Error('Invalid element name!');
-            console.error('Invalid element name!');
           }
 
+          // <![CDATA[  ... ]]>
+          const cdata = ("[CDATA[").split('');
+          if (dashOne === cdata[0] && dashTwo === cdata[1]) {
+            for (let i = 2; i < cdata.length; i++) {
+              if (this.index < maxIndex) {
+                char = this.feed();
+                if (char !== cdata[i]) {
+                  throw new Error('Unexpect character!');
+                  console.error('Unexpect character!');
+                }
+              }
+            }
+
+            // CDATA value string
+            this.current = '';
+            const reg = new RegExp(`]]>$`);
+            while (!reg.test(this.current) && this.index < maxIndex) { // @TODO to be optimize
+              char = this.feed();
+              this.current += char;
+            }
+            this.current = this.current.replace(reg, '');
+            this.emit('cdata', this.current);
+            this.state = State.text;
+            continue;
+          }
+          
         }
 
         if (this.checkElemName(char)) {
@@ -362,14 +444,5 @@ const tokenizer = new Tokenizer(xmlStr, {
 
       console.error('Can not be here!');
     }
-
-
   }
 }
-
-const parser = new Parser(xmlStr);
-parser.parse();
-=======
-});
-tokenizer.parse();
->>>>>>> Stashed changes
