@@ -1,4 +1,4 @@
-/// <reference path="./xmlparsing.d.ts" />
+/// <reference path="../types/tokenizer.d.ts" />
 
 enum State {
   // text

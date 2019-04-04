@@ -4,7 +4,7 @@
   ],
 
   "include": [
-    "./src/**/*.ts",
+    "./src/**/*.ts", "types/tokenizer.d.ts",
   ],
 
   "compilerOptions": {
