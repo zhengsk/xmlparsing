@@ -41,8 +41,10 @@ export class Tokenizer {
   str: string = '';
 
   index: number = -1;
-  row: number = -1;
-  column: number = -1;
+  startIndexes: number[] = [0];
+
+  row: number = 1;
+  column: number = 0;
 
   _rowsLength: number[] = []; // line length in each row
 
@@ -66,6 +68,7 @@ export class Tokenizer {
     if (this.events[eventName]) {
       let data: EventValue = {
         index: this.index,
+        startIndex: this.startIndexes.pop()!,
         column: this.column,
         row: this.row,
         value: this.current,
@@ -93,14 +96,6 @@ export class Tokenizer {
     return /[\s\t\n]/.test(char);
   }
 
-  checkWord(char: string): boolean {
-    if (/\w/.test(char)) {
-      return true;
-    } else {
-      throw new Error('Not valid element name or attribute name!');
-    }
-  }
-
   checkElemName(elemName: string): boolean {
     if (/^[a-zA-Z$-][\w-$:]*$/.test(elemName)) {
       return true;
@@ -124,7 +119,7 @@ export class Tokenizer {
         const char = this.str[this.index];
         if (this.isLineBreak(char)) {
           this._rowsLength.push(this.column);
-          this.column = 0;
+          this.column = 1;
           ++this.row;
         } else {
           ++this.column
@@ -162,11 +157,13 @@ export class Tokenizer {
           this.current += char;
           char = this.feed();
         }
+        
         if (this.current.length) {
           this.emit('text');
         }
+
         this.state = State.elemOpenStart;
-        continue
+        continue;
       }
 
       // elemOpenStart: <
@@ -200,7 +197,6 @@ export class Tokenizer {
             this.emit('comment');
             this.state = State.text;
             continue;
-
           }
 
           // <![CDATA[  ... ]]>
@@ -453,7 +449,7 @@ export class Tokenizer {
             this.emit('text');
           }
           this.state = State.elemOpenStart;
-          continue
+          continue;
         }
 
         this.state = State.text;

@@ -1,5 +1,6 @@
 interface EventValue {
   index: number,
+  startIndex: number,
   column: number,
   row: number,
   value: null | string,
