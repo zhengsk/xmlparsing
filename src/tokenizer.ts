@@ -65,10 +65,15 @@ export class Tokenizer {
   }
 
   emit(eventName: EventNames, opts: { element?: string, booleanValue?: boolean} = {}) {
+    const startIndexMap = ['elementEnd','text', 'comment', 'cdata'];
+    let startIndex = 0;
+    if (startIndexMap.includes(eventName)) {
+      startIndex = this.startIndexes.pop()!;
+    }
     if (this.events[eventName]) {
       let data: EventValue = {
         index: this.index,
-        startIndex: this.startIndexes.pop()!,
+        startIndex,
         column: this.column,
         row: this.row,
         value: this.current,
@@ -82,7 +87,7 @@ export class Tokenizer {
 
       this.events[eventName]!(data)
     }
-    console.info(eventName, ':', this.current);
+    // console.info(eventName, ':', this.current);
   }
 
   isLineBreak(char: string) {
@@ -163,6 +168,7 @@ export class Tokenizer {
         }
 
         this.state = State.elemOpenStart;
+        this.startIndexes.push(this.index);
         continue;
       }
 
@@ -196,6 +202,7 @@ export class Tokenizer {
             this.current = this.current.replace(reg, '');
             this.emit('comment');
             this.state = State.text;
+            this.startIndexes.push(this.index);
             continue;
           }
 
@@ -222,6 +229,7 @@ export class Tokenizer {
             this.current = this.current.replace(reg, '');
             this.emit('cdata');
             this.state = State.text;
+            this.startIndexes.push(this.index);
             continue;
           }
           
@@ -427,6 +435,7 @@ export class Tokenizer {
       if (this.state === State.elemOpenEnd) {
         if (char === "<") {
           this.state = State.elemOpenStart;
+          this.startIndexes.push(this.index);
           continue;
         }
 
@@ -449,6 +458,7 @@ export class Tokenizer {
             this.emit('text');
           }
           this.state = State.elemOpenStart;
+          this.startIndexes.push(this.index);
           continue;
         }
 
@@ -480,6 +490,7 @@ export class Tokenizer {
         if (element === this.current) {
           this.emit('elementClose', {element});
           this.state = State.text;
+          this.startIndexes.push(this.index);
           continue;
         } else {
           throw new Error('Can not match close element!');
