@@ -1,4 +1,4 @@
-interface EventValue {
+export interface EventValue {
   index: number,
   startIndex: number,
   column: number,
@@ -7,8 +7,8 @@ interface EventValue {
   name?: string, // just for attribute
 }
 
-type EventNames = 'elementEnd' | 'elementStart' | 'text' | 'comment' | 'cdata' | 'elementOpen' | 'attributeName' | 'attributeValue' | 'attribute' | 'elementClose' | 'error' | 'end';
+export type EventNames = 'elementEnd' | 'elementStart' | 'text' | 'comment' | 'cdata' | 'elementOpen' | 'attributeName' | 'attributeValue' | 'attribute' | 'elementClose' | 'error' | 'end';
 
-type Events = {
+export type Events = {
   [propName in EventNames]?: (opts: EventValue, err?: Error) => void;
 }

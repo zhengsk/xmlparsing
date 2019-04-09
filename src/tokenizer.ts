@@ -1,4 +1,4 @@
-/// <reference path="../types/tokenizer.d.ts" />
+import { EventNames, EventValue, Events } from '../types/tokenizer';
 
 enum State {
   // text
@@ -27,7 +27,7 @@ enum State {
   attrRightDQuotes, // "
 
   // comment: <!
-  comment,
+  comment
 }
 
 // class Location {
@@ -36,52 +36,57 @@ enum State {
 //   column: number = -1;
 // }
 
-
 export class Tokenizer {
-  str: string = '';
+  private str: string = '';
 
-  index: number = -1;
-  startIndexes: number[] = [0]; // strore each element start index
+  private index: number = -1;
+  private startIndexes: number[] = [0]; // strore each element start index
 
-  row: number = 1;
-  column: number = 0;
+  private row: number = 1;
+  private column: number = 0;
 
-  _rowsLength: number[] = []; // line length in each row
+  private rowsLength: number[] = []; // line length in each row
 
-  current: string = '';
-  elemStack: string[] = [];
+  private current: string = '';
+  private elemStack: string[] = [];
 
-  state: State = State.text;
+  private state: State = State.text;
 
-  textNode: string[] = ['script', 'style'];
+  private textNode: string[] = ['script', 'style'];
 
-  events: Events;
+  private events: Events;
 
-  attributeValueWithoutQuotes: boolean = true;
+  private attributeValueWithoutQuotes: boolean = true;
 
-  _attributeName:string = ''; // store attribute name waiting for attribute value
-  _error?: Error;
+  private attributeName: string = ''; // store attribute name waiting for attribute value
+  private error?: Error;
 
   constructor(str: string, events: Events) {
     this.str = str;
     this.events = events;
   }
 
-  emit(eventName: EventNames, opts: { element?: string, booleanValue?: boolean} = {}) {
-    const startIndexMap = ['elementEnd','text', 'comment', 'cdata'];
+  private emit(
+    eventName: EventNames,
+    opts: { element?: string; booleanValue?: boolean } = {}
+  ) {
+    const startIndexMap = ['elementEnd', 'text', 'comment', 'cdata'];
     let startIndex = 0;
 
     if (startIndexMap.includes(eventName)) {
       startIndex = this.startIndexes.pop()!;
     }
 
-    if (this.events[eventName] || (this.events.attribute && eventName === 'attributeValue')) {
-      let data: EventValue = {
+    if (
+      this.events[eventName] ||
+      (this.events.attribute && eventName === 'attributeValue')
+    ) {
+      const data: EventValue = {
         index: this.index,
         startIndex,
         column: this.column,
         row: this.row,
-        value: this.current,
+        value: this.current
       };
 
       if (eventName === 'elementClose') {
@@ -93,63 +98,61 @@ export class Tokenizer {
       // fire attribute
       if (eventName === 'attributeValue') {
         if (this.events.attributeValue) {
-          this.events['attributeValue']!(data);
+          this.events.attributeValue(data);
         }
 
-        data.name = this._attributeName;
+        data.name = this.attributeName;
         if (this.events.attribute) {
-          this.events['attribute']!(data);
+          this.events.attribute(data);
         }
-        this._attributeName = '';
+        this.attributeName = '';
 
         return false;
       }
 
-      this.events[eventName]!(data, this._error);
-      this._error = undefined;
-      
+      this.events[eventName]!(data, this.error);
+      this.error = undefined;
     }
     // console.info(eventName, ':', this.current);
   }
 
-  isLineBreak(char: string) {
-    if (char === '\n') { // @TODO \r\n
+  private isLineBreak(char: string) {
+    if (char === '\n') {
+      // @TODO \r\n
       return true;
     }
     return false;
   }
 
-  isEmptyChar(char: string) {
+  private isEmptyChar(char: string) {
     return /[\s\t\n]/.test(char);
   }
 
-  checkElemName(elemName: string): boolean {
+  private checkElemName(elemName: string): boolean {
     if (/^[a-zA-Z$-][\w-$:]*$/.test(elemName)) {
       return true;
     }
     throw new Error('Invalid element name!');
   }
 
-  checkAttrName(elemName: string) {
+  private checkAttrName(elemName: string) {
     if (/^[a-zA-Z$_\-:][\w-$:]*$/.test(elemName)) {
       return true;
     }
     throw new Error('Invalid attribute name!');
   }
 
-
-
-  feed(size: number = 1): string {
+  private feed(size: number = 1): string {
     if (size > 0) {
       for (let i = 1; i <= size; i++) {
         this.index += 1;
         const char = this.str[this.index];
         if (this.isLineBreak(char)) {
-          this._rowsLength.push(this.column);
+          this.rowsLength.push(this.column);
           this.column = 1;
           ++this.row;
         } else {
-          ++this.column
+          ++this.column;
         }
       }
     }
@@ -159,10 +162,10 @@ export class Tokenizer {
         this.index -= 1;
         const char = this.str[this.index];
         if (this.isLineBreak(char)) {
-          this.column = this._rowsLength.pop() || 0;
+          this.column = this.rowsLength.pop() || 0;
           --this.row;
         } else {
-          --this.column
+          --this.column;
         }
       }
     }
@@ -170,14 +173,13 @@ export class Tokenizer {
     return this.str[this.index];
   }
 
-
-  parse(): void {
+  public parse(): void {
     try {
       const maxIndex: number = this.str.length - 1;
       while (this.index < maxIndex) {
         let char = this.feed();
         // console.info(char);
-  
+
         // text
         if (this.state === State.text) {
           this.current = '';
@@ -185,40 +187,41 @@ export class Tokenizer {
             this.current += char;
             char = this.feed();
           }
-          
+
           if (this.current.length) {
             this.emit('text');
           }
-  
+
           this.state = State.elemOpenStart;
           this.startIndexes.push(this.index);
           continue;
         }
-  
+
         // elemOpenStart: <
         if (this.state === State.elemOpenStart) {
           if (this.isEmptyChar(char)) {
             continue;
           }
-  
+
           if (char === '/') {
             this.state = State.elemCloseStart;
             continue;
           }
-  
+
           // comment or CDATA element: <!
           if (char === '!') {
             this.current += char; // <!
             const dashOne = this.feed(); // <!-
             const dashTwo = this.feed(); // <!--
-            if(dashOne === '-' && dashTwo === '-') {
+            if (dashOne === '-' && dashTwo === '-') {
               // Comment start
               this.current += dashOne + dashTwo;
               this.state = State.comment;
-  
+
               this.current = '';
               const reg = new RegExp(`-->$`);
-              while (!reg.test(this.current) && this.index < maxIndex) { // @TODO to be optimize
+              while (!reg.test(this.current) && this.index < maxIndex) {
+                // @TODO to be optimize
                 char = this.feed();
                 this.current += char;
               }
@@ -228,9 +231,9 @@ export class Tokenizer {
               this.startIndexes.push(this.index);
               continue;
             }
-  
+
             // <![CDATA[  ... ]]>
-            const cdata = ("[CDATA[").split('');
+            const cdata = '[CDATA['.split('');
             if (dashOne === cdata[0] && dashTwo === cdata[1]) {
               for (let i = 2; i < cdata.length; i++) {
                 if (this.index < maxIndex) {
@@ -241,11 +244,12 @@ export class Tokenizer {
                   }
                 }
               }
-  
+
               // CDATA value string
               this.current = '';
               const reg = new RegExp(`]]>$`);
-              while (!reg.test(this.current) && this.index < maxIndex) { // @TODO to be optimize
+              while (!reg.test(this.current) && this.index < maxIndex) {
+                // @TODO to be optimize
                 char = this.feed();
                 this.current += char;
               }
@@ -255,12 +259,11 @@ export class Tokenizer {
               this.startIndexes.push(this.index);
               continue;
             }
-            
           }
-  
+
           if (this.checkElemName(char)) {
             this.current = char;
-  
+
             while (this.index < maxIndex) {
               char = this.feed();
               // <a ...> or <a/> or <a>
@@ -272,7 +275,7 @@ export class Tokenizer {
                 this.state = State.attrNameStart;
                 break;
               }
-  
+
               this.current += char;
               if (this.checkElemName(this.current)) {
                 continue;
@@ -281,42 +284,42 @@ export class Tokenizer {
             continue;
           }
         }
-  
+
         // attrNameStart
         if (this.state === State.attrNameStart) {
           if (this.isEmptyChar(char)) {
             continue;
           }
-  
+
           if (char === '>') {
             this.state = State.elemOpenEnd;
             this.current = '';
             continue;
           }
-  
+
           if (char === '/') {
             this.state = State.elemSelfClosing;
             this.current = '';
             continue;
           }
-  
+
           if (this.checkAttrName(char)) {
             this.state = State.attrName;
             this.current = char;
-  
+
             while (this.index < maxIndex) {
               char = this.feed();
-  
+
               // <a mn ...> or <a mn= ...> or <a mn/> or <a mn>
               if (this.isEmptyChar(char) || ['=', '/', '>'].includes(char)) {
-                this._attributeName = this.current;
+                this.attributeName = this.current;
                 this.feed(-1);
                 this.emit('attributeName');
                 this.current = '';
                 this.state = State.attrNameEnd;
                 break;
               }
-  
+
               this.current += char;
               if (this.checkAttrName(this.current)) {
                 continue;
@@ -325,150 +328,153 @@ export class Tokenizer {
             continue;
           }
         }
-  
+
         // attrNameEnd
         if (this.state === State.attrNameEnd) {
           if (this.isEmptyChar(char)) {
             continue;
           }
-  
+
           if (char === '=') {
             this.state = State.attrEqual;
             continue;
           }
-  
+
           // boolean attribute
           if (char === '>') {
-            this.emit('attributeValue', {booleanValue: true});
+            this.emit('attributeValue', { booleanValue: true });
             this.state = State.elemOpenEnd;
             continue;
           }
-  
+
           // boolean attribute
           if (char === '/') {
-            this.emit('attributeValue', {booleanValue: true});
+            this.emit('attributeValue', { booleanValue: true });
             this.state = State.elemSelfClosing;
             continue;
           }
-  
+
           // boolean attribute: any other char
-          this.emit('attributeValue', {booleanValue: true}); // @TODO wrong index location
+          this.emit('attributeValue', { booleanValue: true }); // @TODO wrong index location
           this.state = State.attrNameStart;
           this.feed(-1);
           continue;
         }
-  
+
         // attrEqual
         if (this.state === State.attrEqual) {
           if (this.isEmptyChar(char)) {
             this.current = char;
             continue;
           }
-  
-          if (char === '\'') {
+
+          if (char === `'`) {
             this.state = State.attrLeftSQuotes;
             continue;
           }
-  
+
           if (char === '"') {
             this.state = State.attrLeftDQuotes;
             continue;
           }
-  
+
           // support attribute value without quotes.
           if (this.attributeValueWithoutQuotes) {
             if (this.isEmptyChar(this.current)) {
-              this.emit('attributeValue', {booleanValue: true});
+              this.emit('attributeValue', { booleanValue: true });
               this.current = '';
               this.state = State.attrNameStart;
               this.feed(-1);
               continue;
             }
-  
-            while(this.index < maxIndex) {
+
+            while (this.index < maxIndex) {
               if (char === '>') {
                 this.emit('attributeValue');
                 this.current = '';
                 this.state = State.text;
                 break;
               }
-    
+
               if (this.isEmptyChar(char)) {
                 this.emit('attributeValue');
                 this.current = '';
                 this.state = State.attrNameStart;
                 break;
               }
-  
+
               if (char === '/') {
                 this.emit('attributeValue');
                 this.current = '';
                 this.state = State.elemSelfClosing;
                 break;
               }
-              
+
               this.current += char;
               char = this.feed();
             }
             continue;
           }
-  
+
           throw new Error('Invalid attribute value!');
           console.error('Invalid attribute value!');
         }
-  
+
         // attrLeftSQuotes or attrLeftDQuotes
-        if (this.state === State.attrLeftSQuotes || this.state === State.attrLeftDQuotes) {
+        if (
+          this.state === State.attrLeftSQuotes ||
+          this.state === State.attrLeftDQuotes
+        ) {
           const quotes = {
-            [State.attrLeftSQuotes]: "'",
+            [State.attrLeftSQuotes]: `'`,
             [State.attrLeftDQuotes]: '"'
           }[this.state];
-  
+
           let isEscape: boolean = false;
           while ((char !== quotes || isEscape) && this.index < maxIndex) {
             this.current += char;
             isEscape = !isEscape && char === '\\';
             char = this.feed();
           }
-  
+
           this.emit('attributeValue');
           this.current = '';
           this.state = State.attrNameStart;
           continue;
         }
-  
+
         // elemSelfClosing
         if (this.state === State.elemSelfClosing) {
           if (this.isEmptyChar(char)) {
             continue;
           }
-  
+
           if (char === '>') {
             const element = this.elemStack.pop();
-            this.emit('elementClose', {element}); // selfClosing
+            this.emit('elementClose', { element }); // selfClosing
             this.state = State.text;
             continue;
           }
-  
+
           throw new Error('Invalid char in self-closing element!');
           console.error('Invalid char in self-closing element!');
         }
-  
-  
+
         // elemOpenEnd
         if (this.state === State.elemOpenEnd) {
-          if (char === "<") {
+          if (char === '<') {
             this.state = State.elemOpenStart;
             this.startIndexes.push(this.index);
             continue;
           }
-  
+
           // TextNode
           const element = this.elemStack[this.elemStack.length - 1];
           if (this.textNode.includes(element)) {
             this.current = char;
             const reg = new RegExp(`<\\s*/\\s*${element}\\s*>$`);
-            while (!reg.test(this.current) && this.index < maxIndex) { // @TODO to be optimize
+            while (!reg.test(this.current) && this.index < maxIndex) {
+              // @TODO to be optimize
               char = this.feed();
               this.current += char;
             }
@@ -476,7 +482,7 @@ export class Tokenizer {
             this.current = this.current.replace(reg, tag => {
               lastTag = tag;
               return '';
-            })
+            });
             this.feed(-lastTag.length + 1);
             if (this.current.length) {
               this.emit('text');
@@ -485,34 +491,34 @@ export class Tokenizer {
             this.startIndexes.push(this.index);
             continue;
           }
-  
+
           this.state = State.text;
           this.feed(-1);
           continue;
         }
-  
+
         // elemCloseStart: /
         if (this.state === State.elemCloseStart) {
           if (this.isEmptyChar(char)) {
             continue;
           }
-  
+
           // < / >
           if (char === '>') {
             throw new Error('Empty close element!');
             console.error('Empty close element!');
           }
-  
+
           this.current = '';
           while (char !== '>' && this.index < maxIndex) {
             this.current += char;
-            if (this.checkElemName(this.current)){
+            if (this.checkElemName(this.current)) {
               char = this.feed();
             }
           }
           const element = this.elemStack.pop();
           if (element === this.current) {
-            this.emit('elementClose', {element});
+            this.emit('elementClose', { element });
             this.state = State.text;
             this.startIndexes.push(this.index);
             continue;
@@ -521,12 +527,12 @@ export class Tokenizer {
             console.error('Can not match close element!');
           }
         }
-  
+
         console.error('Can not be here!');
       }
       this.emit('end');
     } catch (err) {
-      this._error = err;
+      this.error = err;
       this.emit('error');
       console.error(err);
     }

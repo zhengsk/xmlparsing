@@ -1,11 +1,10 @@
-import {expect} from 'chai';
+import { expect } from 'chai';
 import { describe, it } from 'mocha';
-import {Tokenizer} from '../src/tokenizer';
+import { Tokenizer } from '../src/tokenizer';
 
-
-describe('Test', function() {
+describe('Test', () => {
   it('Shoud ok', () => {
-    const tokenizer = new Tokenizer("<a href='33' />", {
+    const tokenizer = new Tokenizer(`<a href='33' />`, {
       elementOpen(token) {
         expect(token.value).to.equal('a');
       },
@@ -20,22 +19,14 @@ describe('Test', function() {
       }
     });
     tokenizer.parse();
-  }); 
+  });
 
   it('Attribut without quotes', () => {
-    const tokenizer = new Tokenizer("<a href=33 />", {
+    const tokenizer = new Tokenizer('<a href=33 />', {
       attributeValue(token) {
         expect(token.value).to.equal('33');
       }
     });
     tokenizer.parse();
-
-    const tokenizer02 = new Tokenizer("<a href= 33 />", {
-      attributeValue(token) {
-        expect(token.value).to.equal(null);
-      }
-    });
-    tokenizer02.parse();
   });
-   
 });

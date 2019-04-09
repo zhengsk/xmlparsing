@@ -1,4 +1,5 @@
 import fs from 'fs';
+import { EventValue } from '../types/tokenizer';
 import { Tokenizer } from './tokenizer';
 
 const xmlStr: string = fs.readFileSync('./src/template', 'utf8');
@@ -6,56 +7,58 @@ const xmlStr: string = fs.readFileSync('./src/template', 'utf8');
 type NodeType = 'document' | 'element' | 'text' | 'comment' | 'cdata';
 
 class Attribute {
-  name: string;
-  value: string | null;
+  public name: string;
+  public value: string | null;
 
-  constructor(name: string, value: string|null) {
+  constructor(name: string, value: string | null) {
     this.name = name;
     this.value = value;
   }
 }
 
-class AttributeList {
-  [key: string]: string | null | Map<string, Attribute> | Function;
-  attributs: Map<string, Attribute> = new Map();
+type func = (name: string, value: string | null) => void;
 
-  get(name: string): string | null {
+class AttributeList {
+  [key: string]: string | Map<string, Attribute> | null | func;
+  public attributs: Map<string, Attribute> = new Map();
+
+  public get(name: string): string | null {
     if (this.attributs.has(name)) {
-      return <string | null>this[name];
+      return this[name] as string | null;
     }
     return null;
   }
 
-  set(name: string, value: string | null) {
+  public set(name: string, value: string | null) {
     const attr = new Attribute(name, value);
     this.attributs.set(name, attr);
     this[name] = value;
   }
 
-  remove(name: string) {
+  public remove(name: string) {
     this.attributs.delete(name);
     delete this[name];
   }
 }
 
 class Node {
-  nodeType: NodeType;
-  nodeValue?: string | null = null;
+  public nodeType: NodeType;
+  public nodeValue?: string | null = null;
 
-  _map?: AttributeList | null;
-  children: Node[] | undefined;
+  public attributs?: AttributeList | null;
 
-  parentNode?: Node | null;
+  public children: Node[] | undefined;
+  public parentNode?: Node | null;
 
-  stats?: EventValue;
+  public stats?: EventValue;
 
   constructor(type: NodeType, stats: EventValue) {
     this.nodeType = type;
-    
+
     this.stats = stats;
   }
 
-  appendChild(node: Node): Node {
+  public appendChild(node: Node): Node {
     if (!this.children) {
       this.children = [];
     }
@@ -64,7 +67,7 @@ class Node {
     return node;
   }
 
-  removeChild(node: Node): Node {
+  public removeChild(node: Node): Node {
     if (this.children && this.children.includes(node)) {
       const index = this.children.indexOf(node);
       this.children.splice(index, 1);
@@ -75,23 +78,23 @@ class Node {
   }
 
   // attribute operator
-  getAttribute(name: string): string|null {
-    if (this._map){
-      return <string | null>this._map.get(name)!;
+  public getAttribute(name: string): string | null {
+    if (this.attributs) {
+      return this.attributs.get(name)! as string | null;
     }
     return null;
   }
 
-  setAttribute(name: string , value: string | null) {
-    if (!this._map){
-      this._map = new AttributeList();
+  public setAttribute(name: string, value: string | null) {
+    if (!this.attributs) {
+      this.attributs = new AttributeList();
     }
-    this._map.set(name, value);
+    this.attributs.set(name, value);
   }
 
-  removeAttribute(name: string) {
-    if (this._map) {
-      this._map.remove(name);
+  public removeAttribute(name: string) {
+    if (this.attributs) {
+      this.attributs.remove(name);
     }
   }
 
@@ -138,7 +141,7 @@ class Cdata extends Node {
 }
 
 class Element extends Node {
-  tagName: string;
+  public tagName: string;
 
   constructor(stats: EventValue) {
     super('element', stats);
@@ -146,23 +149,21 @@ class Element extends Node {
   }
 }
 
-class Document extends Node{
-  type: NodeType = 'document';
-  children: Element[] = [];
+class Document extends Node {
+  public type: NodeType = 'document';
+  public children: Element[] = [];
 }
-
 
 const ast = new Document('document', {
   value: 'docuement',
   index: 0,
   startIndex: 0,
   column: 1,
-  row: 1,
+  row: 1
 });
 
 const elementStack: Node[] = [];
 let currentElement: Node = ast;
-
 
 const tokenizer = new Tokenizer(xmlStr, {
   text(stats) {
@@ -193,17 +194,17 @@ const tokenizer = new Tokenizer(xmlStr, {
   elementClose(stats) {
     currentElement = elementStack.pop()!;
     console.info(ast);
-    // debugger; // eslint-disable-line
+    // debugger; // tslint:disable-line
   },
 
-  end(){
-    // debugger; // eslint-disable-line
+  end() {
+    // debugger; // tslint:disable-line
     console.info(ast);
   },
 
   error(stats, err) {
-    debugger; // eslint-disable-line
-  },
+    debugger; // tslint:disable-line
+  }
 });
 
 tokenizer.parse();
