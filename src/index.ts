@@ -8,32 +8,50 @@ type elementType = 'root' | 'element' | 'text' | 'comment' | 'cdata';
 class Element {
   type: elementType;
   stats?: EventValue;
+  attributes?: Map<string, string>;
   children: Element[] | undefined;
 
   constructor(type: elementType, stats?: EventValue) {
     this.type = type;
     this.stats = stats;
   }
+
+  appendChild(element: Element): Element {
+    if (!this.children) {
+      this.children = [];
+    }
+    this.children.push(element);
+    return element;
+  }
+
+  setAttribute(key: string , value: string) {
+    if (!this.attributes){
+      this.attributes = new Map();
+    }
+    this.attributes.set(key, value);
+  }
+
+  getAttribute(key: string): string|null {
+    if (this.attributes){
+      return this.attributes.get(key)!;
+    }
+    return null;
+  }
 }
 
 class AST extends Element{
   type: elementType = 'root';
   children: Element[] = [];
-  currentElement: Element = this;
+  
 
-  addChild(element: Element) {
-    if (!this.currentElement.children) {
-      this.currentElement.children = [];
-    }
-    this.currentElement.children.push(element);
-  }
   
 }
 
 
 const ast = new AST('root');
 
-
+const elementStack: Element[] = [];
+let currentElement: Element = ast;
 
 
 function createElement(type: EventNames, stats: EventValue) {
@@ -42,27 +60,27 @@ function createElement(type: EventNames, stats: EventValue) {
   }
 }
 
-const currentElement = {};
 
 const tokenizer = new Tokenizer(xmlStr, {
   text: (stats) => {
-    ast.addChild(new Element('text', stats));
+    currentElement.appendChild(new Element('text', stats));
   },
 
   comment: (stats) => {
-    console.table(stats);
+    currentElement.appendChild(new Element('comment', stats));
   },
 
   cdata: (stats) => {
-    console.table(stats);
+    currentElement.appendChild(new Element('cdata', stats));
   },
 
   elementOpen: (stats) => {
-    console.table(stats);
+    currentElement = currentElement.appendChild(new Element('element', stats));
+    elementStack.push(currentElement);
   },
 
   attributeName: (stats) => {
-    console.table(stats);
+    // currentElement.setAttribute(stats.value!, stats.);
   },
 
   attributeValue: (stats) => {
@@ -70,7 +88,7 @@ const tokenizer = new Tokenizer(xmlStr, {
   },
 
   elementClose: (stats) => {
-    console.table(stats);
+    currentElement = elementStack.pop()!;
   }
 });
 tokenizer.parse();
