@@ -69,10 +69,12 @@ export class Tokenizer {
   emit(eventName: EventNames, opts: { element?: string, booleanValue?: boolean} = {}) {
     const startIndexMap = ['elementEnd','text', 'comment', 'cdata'];
     let startIndex = 0;
+
     if (startIndexMap.includes(eventName)) {
       startIndex = this.startIndexes.pop()!;
     }
-    if (this.events[eventName]) {
+
+    if (this.events[eventName] || (this.events.attribute && eventName === 'attributeValue')) {
       let data: EventValue = {
         index: this.index,
         startIndex,
@@ -81,25 +83,21 @@ export class Tokenizer {
         value: this.current,
       };
 
-      
-
       if (eventName === 'elementClose') {
         data.value = opts!.element!;
       } else if (eventName === 'attributeValue' && opts.booleanValue) {
         data.value = null;
       }
 
-      if (eventName === 'attributeName') {
-        this._attributeName = data.value!;
-      }
-
+      // fire attribute
       if (eventName === 'attributeValue') {
+        data.key = this._attributeName;
         this.events['attribute']!(data);
         this._attributeName = '';
         return false;
+      } else {
+        this.events[eventName]!(data);
       }
-
-      this.events[eventName]!(data)
     }
     // console.info(eventName, ':', this.current);
   }
@@ -300,6 +298,7 @@ export class Tokenizer {
 
             // <a mn ...> or <a mn= ...> or <a mn/> or <a mn>
             if (this.isEmptyChar(char) || ['=', '/', '>'].includes(char)) {
+              this._attributeName = this.current;
               this.feed(-1);
               this.emit('attributeName');
               this.current = '';
