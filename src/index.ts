@@ -10,9 +10,11 @@ class Element {
   stats?: EventValue;
   attributes?: Map<string, string>;
   children: Element[] | undefined;
+  tagName: string;
 
-  constructor(type: elementType, stats?: EventValue) {
+  constructor(type: elementType, stats: EventValue) {
     this.type = type;
+    this.tagName = stats!.value!;
     this.stats = stats;
   }
 
@@ -42,13 +44,16 @@ class Element {
 class AST extends Element{
   type: elementType = 'root';
   children: Element[] = [];
-  
-
-  
 }
 
 
-const ast = new AST('root');
+const ast = new AST('root', {
+  value: 'docuement',
+  index: 0,
+  startIndex: 0,
+  column: 1,
+  row: 1,
+});
 
 const elementStack: Element[] = [];
 let currentElement: Element = ast;
@@ -62,33 +67,49 @@ function createElement(type: EventNames, stats: EventValue) {
 
 
 const tokenizer = new Tokenizer(xmlStr, {
-  text: (stats) => {
+  text(stats) {
     currentElement.appendChild(new Element('text', stats));
   },
 
-  comment: (stats) => {
+  comment(stats) {
     currentElement.appendChild(new Element('comment', stats));
   },
 
-  cdata: (stats) => {
+  cdata(stats) {
     currentElement.appendChild(new Element('cdata', stats));
   },
 
-  elementOpen: (stats) => {
-    currentElement = currentElement.appendChild(new Element('element', stats));
+  elementOpen(stats) {
     elementStack.push(currentElement);
+    currentElement = currentElement.appendChild(new Element('element', stats));
   },
 
-  attributeName: (stats) => {
+  attributeName(stats) {
     // currentElement.setAttribute(stats.value!, stats.);
   },
 
-  attributeValue: (stats) => {
-    console.table(stats);
+  attributeValue(stats) {
+    // console.table(stats);
   },
 
-  elementClose: (stats) => {
+  attribute(stats) {
+    currentElement.setAttribute(stats.key!, stats.value!);
+  },
+
+  elementClose(stats) {
     currentElement = elementStack.pop()!;
-  }
+    console.info(ast);
+    // debugger; // eslint-disable-line
+  },
+
+  end(){
+    debugger; // eslint-disable-line
+    console.info(ast);
+  },
+
+  error(stats) {
+    debugger; // eslint-disable-line
+  },
 });
+
 tokenizer.parse();

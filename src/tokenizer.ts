@@ -41,7 +41,7 @@ export class Tokenizer {
   str: string = '';
 
   index: number = -1;
-  startIndexes: number[] = [0];
+  startIndexes: number[] = [0]; // strore each element start index
 
   row: number = 1;
   column: number = 0;
@@ -58,6 +58,8 @@ export class Tokenizer {
   events: Events;
 
   attributeValueWithoutQuotes: boolean = true;
+
+  _attributeName:string = ''; // store attribute name waiting for attribute value
 
   constructor(str: string, events: Events) {
     this.str = str;
@@ -79,10 +81,22 @@ export class Tokenizer {
         value: this.current,
       };
 
+      
+
       if (eventName === 'elementClose') {
         data.value = opts!.element!;
       } else if (eventName === 'attributeValue' && opts.booleanValue) {
         data.value = null;
+      }
+
+      if (eventName === 'attributeName') {
+        this._attributeName = data.value!;
+      }
+
+      if (eventName === 'attributeValue') {
+        this.events['attribute']!(data);
+        this._attributeName = '';
+        return false;
       }
 
       this.events[eventName]!(data)
@@ -500,5 +514,7 @@ export class Tokenizer {
 
       console.error('Can not be here!');
     }
+
+    this.emit('end');
   }
 }
