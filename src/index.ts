@@ -201,7 +201,7 @@ const tokenizer = new Tokenizer(xmlStr, {
     console.info(ast);
   },
 
-  error(stats) {
+  error(stats, err) {
     debugger; // eslint-disable-line
   },
 });

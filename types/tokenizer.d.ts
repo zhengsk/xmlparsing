@@ -10,5 +10,5 @@ interface EventValue {
 type EventNames = 'elementEnd' | 'elementStart' | 'text' | 'comment' | 'cdata' | 'elementOpen' | 'attributeName' | 'attributeValue' | 'attribute' | 'elementClose' | 'error' | 'end';
 
 type Events = {
-  [propName in EventNames]?: (opts: EventValue) => void;
+  [propName in EventNames]?: (opts: EventValue, err?: Error) => void;
 }
