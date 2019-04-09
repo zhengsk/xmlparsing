@@ -91,13 +91,20 @@ export class Tokenizer {
 
       // fire attribute
       if (eventName === 'attributeValue') {
-        data.key = this._attributeName;
-        this.events['attribute']!(data);
+        if (this.events.attributeValue) {
+          this.events['attributeValue']!(data);
+        }
+
+        data.name = this._attributeName;
+        if (this.events.attribute) {
+          this.events['attribute']!(data);
+        }
         this._attributeName = '';
+
         return false;
-      } else {
-        this.events[eventName]!(data);
       }
+
+      this.events[eventName]!(data);
     }
     // console.info(eventName, ':', this.current);
   }

@@ -5,11 +5,44 @@ const xmlStr: string = fs.readFileSync('./src/template', 'utf8');
 
 type NodeType = 'document' | 'element' | 'text' | 'comment' | 'cdata';
 
+class Attribute {
+  name: string;
+  value: string | null;
+
+  constructor(name: string, value: string|null) {
+    this.name = name;
+    this.value = value;
+  }
+}
+
+class AttributeList {
+  [key: string]: string | null | Map<string, Attribute> | Function;
+  attributs: Map<string, Attribute> = new Map();
+
+  get(name: string): string | null {
+    if (this.attributs.has(name)) {
+      return <string | null>this[name];
+    }
+    return null;
+  }
+
+  set(name: string, value: string | null) {
+    const attr = new Attribute(name, value);
+    this.attributs.set(name, attr);
+    this[name] = value;
+  }
+
+  remove(name: string) {
+    this.attributs.delete(name);
+    delete this[name];
+  }
+}
+
 class Node {
   nodeType: NodeType;
   nodeValue?: string | null = null;
 
-  attributes?: Map<string, string>;
+  _map?: AttributeList | null;
   children: Node[] | undefined;
 
   parentNode?: Node | null;
@@ -27,21 +60,59 @@ class Node {
       this.children = [];
     }
     this.children.push(node);
+    node.parentNode = this;
     return node;
   }
 
-  setAttribute(key: string , value: string) {
-    if (!this.attributes){
-      this.attributes = new Map();
+  removeChild(node: Node): Node {
+    if (this.children && this.children.includes(node)) {
+      const index = this.children.indexOf(node);
+      this.children.splice(index, 1);
+      delete node.parentNode;
+      return node;
     }
-    this.attributes.set(key, value);
+    throw new Error('The node to be removed is not a child of this node.');
   }
 
-  getAttribute(key: string): string|null {
-    if (this.attributes){
-      return this.attributes.get(key)!;
+  // attribute operator
+  getAttribute(name: string): string|null {
+    if (this._map){
+      return <string | null>this._map.get(name)!;
     }
     return null;
+  }
+
+  setAttribute(name: string , value: string | null) {
+    if (!this._map){
+      this._map = new AttributeList();
+    }
+    this._map.set(name, value);
+  }
+
+  removeAttribute(name: string) {
+    if (this._map) {
+      this._map.remove(name);
+    }
+  }
+
+  // @TODO
+  get previousSibling() {
+    return 0;
+  }
+
+  // @TODO
+  get previousElementSibling() {
+    return 0;
+  }
+
+  // @TODO
+  get nextSibling() {
+    return 0;
+  }
+
+  // @TODO
+  get nextElementSibling() {
+    return 0;
   }
 }
 
@@ -116,7 +187,7 @@ const tokenizer = new Tokenizer(xmlStr, {
   },
 
   attribute(stats) {
-    currentElement.setAttribute(stats.key!, stats.value!);
+    currentElement.setAttribute(stats.name!, stats.value!);
   },
 
   elementClose(stats) {

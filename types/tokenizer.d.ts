@@ -4,7 +4,7 @@ interface EventValue {
   column: number,
   row: number,
   value: null | string,
-  key?: string, // just for attribute
+  name?: string, // just for attribute
 }
 
 type EventNames = 'elementEnd' | 'elementStart' | 'text' | 'comment' | 'cdata' | 'elementOpen' | 'attributeName' | 'attributeValue' | 'attribute' | 'elementClose' | 'error' | 'end';
