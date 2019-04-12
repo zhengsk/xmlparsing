@@ -68,7 +68,11 @@ export class Tokenizer {
 
   private emit(
     eventName: EventNames,
-    opts: { element?: string; booleanValue?: boolean } = {}
+    opts: {
+      element?: string;
+      booleanValue?: boolean;
+      selfClosing?: boolean;
+    } = {}
   ) {
     const startIndexMap = ['elementEnd', 'text', 'comment', 'cdata'];
     let startIndex = 0;
@@ -91,6 +95,9 @@ export class Tokenizer {
 
       if (eventName === 'elementClose') {
         data.value = opts!.element!;
+        if (opts.selfClosing) {
+          data.selfClosing = true;
+        }
       } else if (eventName === 'attributeValue' && opts.booleanValue) {
         data.value = null;
       }
@@ -451,7 +458,7 @@ export class Tokenizer {
 
           if (char === '>') {
             const element = this.elemStack.pop();
-            this.emit('elementClose', { element }); // selfClosing
+            this.emit('elementClose', { element, selfClosing: true }); // selfClosing
             this.state = State.text;
             continue;
           }

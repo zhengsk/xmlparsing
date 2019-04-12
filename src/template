@@ -1,5 +1,23 @@
-<h1 id="33" class="title ok">
-	<!-- show title -->
-	<a href="http://www.google.com"> Google </a>
-</h1>
-<hr />
+<view class="i-index i-class">
+    <scroll-view 
+        scroll-y 
+        style="{{parse.setScrollStyle(height)}}" 
+        onScroll="handlerScroll"
+        scroll-top="{{scrollTop}}">
+        <slot></slot>  
+        <view class="i-index-fixed" 
+            catchTouchStart="handlerTouchMove" 
+            catchTouchMove="handlerTouchMove" 
+            catchTouchEnd="handlerTouchEnd">
+            <view class="i-index-fixed-item" 
+                a:for="{{fixedData}}" 
+                a:key="{{index}}" 
+                data-index="{{index}}" 
+                catchTap="handlerFixedTap">
+                {{item}}
+            </view>
+        </view>  
+        <view class="i-index-tooltip" style="{{ isTouches ? 'display:block' : 'display:none' }}">{{currentName}}</view>
+    </scroll-view>
+</view>
+<import-sjs from="./parse.sjs" name="parse" />
