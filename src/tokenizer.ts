@@ -190,9 +190,13 @@ export class Tokenizer {
         // text
         if (this.state === State.text) {
           this.current = '';
-          while (char !== '<' && this.index < maxIndex) {
+          while (char !== '<') {
             this.current += char;
-            char = this.feed();
+            if (this.index < maxIndex) {
+              char = this.feed();
+            } else {
+              break;
+            }
           }
 
           if (this.current.length) {
