@@ -1,5 +1,6 @@
 import fs from 'fs';
-import parser, { Document } from './parser';
+import { Document } from './node';
+import parser from './parser';
 import generator from './generator';
 
 const xmlStr: string = fs.readFileSync('./src/template', 'utf8');

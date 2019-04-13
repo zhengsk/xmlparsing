@@ -1,4 +1,4 @@
-import { Document, Element, Node } from './parser';
+import { Document, Element, Node } from './node';
 import { format } from 'util';
 
 // format indent
