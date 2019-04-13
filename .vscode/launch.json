@@ -7,23 +7,23 @@
     "type": "node",
     "request": "launch",
     "sourceMaps": true,
-    "name": "Launch Program",
+    "name": "Run",
     "program": "${workspaceFolder}/build/index.js",
     "outFiles": [
       "${workspaceFolder}/**/*.js"
     ]
-  },{
+  }, {
     "type": "node",
     "request": "launch",
     "name": "Mocha Test",
     "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
     "args": [
-        "--require", "ts-node/register",
-        "-u", "tdd",
-        "--timeout", "999999",
-        "--colors", "--recursive",
-        "${workspaceFolder}/test/**/*.ts"
+      "--require", "ts-node/register",
+      "-u", "tdd",
+      "--timeout", "999999",
+      "--colors", "--recursive",
+      "${workspaceFolder}/test/**/*.ts"
     ],
     "internalConsoleOptions": "openOnSessionStart"
-}]
+  }]
 }
