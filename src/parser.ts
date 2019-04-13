@@ -162,17 +162,17 @@ export class Element extends Node {
   }
 }
 
-// AST Node
-export class AST extends Node {
+// Document Node
+export class Document extends Node {
   constructor(stats: EventValue) {
     super('document', stats);
   }
 }
 
 // parse
-function parse(xmlStr: string): AST {
+function parse(xmlStr: string): Document {
   // ast
-  const ast = new AST({
+  const ast = new Document({
     value: 'docuement',
     index: 0,
     startIndex: 0,
@@ -215,11 +215,9 @@ function parse(xmlStr: string): AST {
       }
       currentElement = elementStack.pop()!;
       // console.info(ast);
-      // debugger; // tslint:disable-line
     },
 
     end() {
-      // debugger; // tslint:disable-line
       // console.info(ast);
     },
 

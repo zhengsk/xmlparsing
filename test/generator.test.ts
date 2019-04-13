@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { describe, it } from 'mocha';
 import { Tokenizer } from '../src/tokenizer';
 
-import parser, { AST } from '../src/parser';
+import parser, { Document } from '../src/parser';
 import generator from '../src/generator';
 
 
@@ -15,7 +15,7 @@ function itCase(
   generateOpts: { format: boolean | string } = { format: false }
 ) {
   it(opts.title, () => {
-    const ast: AST = parser.parse(opts.sourceStr);
+    const ast: Document = parser.parse(opts.sourceStr);
     const newXmlStr: string = generator.generate(ast, generateOpts);
 
     expect(newXmlStr).eq(opts.targetStr);

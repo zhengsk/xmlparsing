@@ -1,4 +1,4 @@
-import { AST, Element, Node } from './parser';
+import { Document, Element, Node } from './parser';
 import { format } from 'util';
 
 // format indent
@@ -88,7 +88,7 @@ function elementStringify(element: Element) {
 }
 
 function generate(
-  ast: AST,
+  ast: Document,
   options: { format: string | boolean } = { format: false }
 ): string {
   if (options.format) {
