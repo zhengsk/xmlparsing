@@ -214,13 +214,13 @@ function parse(xmlStr: string): AST {
         currentElement.selfClosing = true;
       }
       currentElement = elementStack.pop()!;
-      console.info(ast);
+      // console.info(ast);
       // debugger; // tslint:disable-line
     },
 
     end() {
       // debugger; // tslint:disable-line
-      console.info(ast);
+      // console.info(ast);
     },
 
     error(stats, err) {

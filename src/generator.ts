@@ -5,6 +5,7 @@ import { format } from 'util';
 let isFirstFormat = true;
 let indentLen = 0;
 let indentStr: string | boolean = '  '; // 缩进
+
 function formatStr() {
   // remove first newline '\n'
   if (isFirstFormat) {
@@ -100,12 +101,17 @@ function generate(
   let result: string = '';
   if (ast.nodeType === 'document') {
     const element = ast;
-    if (element.children!.length) {
+    if (element.children && element.children!.length) {
       element.children!.forEach(elem => {
         result += elementStringify(elem as Element);
       });
     }
   }
+
+  // reset
+  isFirstFormat = true;
+  indentLen = 0;
+  indentStr = '  '; // 缩进
 
   return result;
 }
