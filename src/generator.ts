@@ -1,11 +1,22 @@
 import { AST, Element, Node } from './parser';
+import { format } from 'util';
 
 // format indent
+let isFirstFormat = true;
 let indentLen = 0;
-
-const indentStr = '  '; // 缩进
+let indentStr: string | boolean = '  '; // 缩进
 function formatStr() {
-  return `\n${indentStr.repeat(indentLen)}`;
+  // remove first newline '\n'
+  if (isFirstFormat) {
+    isFirstFormat = false;
+    return '';
+  }
+
+  if (typeof indentStr === 'string') {
+    return `\n${indentStr.repeat(indentLen)}`;
+  } else {
+    return '';
+  }
 }
 
 // element stringify
@@ -75,7 +86,17 @@ function elementStringify(element: Element) {
   }
 }
 
-function generate(ast: AST): string {
+function generate(
+  ast: AST,
+  options: { format: string | boolean } = { format: false }
+): string {
+  if (options.format) {
+    if (typeof options.format === 'string') {
+      indentStr = options.format;
+    }
+  } else {
+    indentStr = false;
+  }
   let result: string = '';
   if (ast.nodeType === 'document') {
     const element = ast;

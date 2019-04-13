@@ -7,6 +7,6 @@ const xmlStr: string = fs.readFileSync('./src/template', 'utf8');
 const ast: AST = parse.parse(xmlStr);
 console.info(ast);
 
-const newStr: string = generator.generate(ast);
+const newXmlStr: string = generator.generate(ast, { format: true });
 
 debugger; // tslint:disable-line
