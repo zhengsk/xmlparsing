@@ -26,12 +26,6 @@ function itCase(
 
 describe('Generator', () => {
   itCase({
-    title: 'Element width attribute',
-    sourceStr: '<abc b="hello\\""></abc>',
-    targetStr: '<abc b="hello\\""></abc>',
-  });
-
-  itCase({
     title: 'Empty xml',
     sourceStr: '',
     targetStr: '',
@@ -48,6 +42,12 @@ describe('Generator', () => {
     title: 'Element attribute without quotes',
     sourceStr: '<abc a=33></abc>',
     targetStr: '<abc a="33"></abc>',
+  });
+
+  itCase({
+    title: 'Element width attribute',
+    sourceStr: '<abc b="hello\\""></abc>',
+    targetStr: '<abc b="hello\\""></abc>',
   });
 
   itCase({
