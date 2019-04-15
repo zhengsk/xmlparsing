@@ -1,13 +1,15 @@
 {
   "name": "xmlparsing",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "xml parsing",
   "main": "index.js",
   "scripts": {
     "test": "mocha --require ts-node/register ./test/**/*.ts"
   },
   "author": "zsk526",
-  "files": ["./build/"],
+  "files": [
+    "./build/"
+  ],
   "repository": {
     "type": "git",
     "url": "git@github.com:zhengsk/xmlparsing.git"
