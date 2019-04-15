@@ -7,6 +7,11 @@
     "test": "mocha --require ts-node/register ./test/**/*.ts"
   },
   "author": "zsk526",
+  "files": ["./build/"],
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:zhengsk/xmlparsing.git"
+  },
   "license": "ISC",
   "husky": {
     "hooks": {
