@@ -4,7 +4,8 @@
   "description": "xml parsing",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --require ts-node/register ./test/**/*.ts"
+    "test": "nyc --reporter=text mocha --require ts-node/register ./test/**/*.ts",
+    "test:report": "nyc mocha --require ts-node/register ./test/**/*.ts"
   },
   "author": "zsk526",
   "files": [
@@ -19,6 +20,26 @@
     "hooks": {
       "pre-commit": "npm test"
     }
+  },
+  "nyc": {
+    "include": [
+      "src/**/*.ts"
+    ],
+    "exclude": [
+      "test/**/*.test.ts"
+    ],
+    "extension": [
+      ".ts"
+    ],
+    "require": [
+      "ts-node/register"
+    ],
+    "reporter": [
+      "text",
+      "html"
+    ],
+    "sourceMap": true,
+    "instrument": true
   },
   "devDependencies": {
     "@types/chai": "^4.1.7",
