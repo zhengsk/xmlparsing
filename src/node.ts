@@ -91,8 +91,8 @@ export class Node {
     if (!this.children) {
       this.children = [];
     }
-
     newNode.parentNode = this;
+    // @TODO: should be removed from parentNode chidrens.
 
     if (referenceNode === null) {
       return this.appendChild(newNode);
@@ -114,41 +114,47 @@ export class Node {
     throw new Error('The node to be removed is not a child of this node.');
   }
 
+  // clone
+  public cloneNode(deep: boolean = false): Node {
+    // @TODO: implement
+    return this;
+  }
+
   // previousSibling
   get previousSibling(): Node | null {
-    const node = null;
+    let node = null;
     if (this.parentNode) {
       const index = this.parentNode.children!.indexOf(this);
-      return this.parentNode.children![index - 1] || node;
+      node = this.parentNode.children![index - 1];
     }
     return node;
   }
 
   // previousElementSibling
   get previousElementSibling(): Element | null {
-    let node = null;
-    do {
-      node = this.previousSibling;
-    } while (node && node.nodeType !== 'element');
+    let node = this.previousSibling;
+    while (node && node.nodeType !== 'element') {
+      node = node.previousSibling;
+    }
     return node as Element;
   }
 
   // nextSibling
   get nextSibling(): Node | null {
-    const node = null;
+    let node = null;
     if (this.parentNode) {
       const index = this.parentNode.children!.indexOf(this);
-      return this.parentNode.children![index + 1] || node;
+      node = this.parentNode.children![index + 1];
     }
     return node;
   }
 
   // nextElementSibling
   get nextElementSibling(): Element | null {
-    let node = null;
-    do {
-      node = this.nextSibling;
-    } while (node && node.nodeType !== 'element');
+    let node = this.nextSibling;
+    while (node && node.nodeType !== 'element') {
+      node = node.nextSibling;
+    }
     return node as Element;
   }
 

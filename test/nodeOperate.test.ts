@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { describe, it } from 'mocha';
 import { Tokenizer } from '../src/tokenizer';
 
-import { Document, Element } from '../src/node';
+import { Document, Element, Node } from '../src/node';
 import parser from '../src/parser';
 import generator from '../src/generator';
 
@@ -82,5 +82,58 @@ describe('Node operate', () => {
     const doc: Document = parser.parse(opts.sourceStr);
     const result = doc.getElementsByTagName('a');
     expect(result.length).eq(2);
+  });
+
+  it('Node: removeChild', () => {
+    const opts = {
+      sourceStr: '<abc b="ab"><a>text</a></abc>',
+      targetStr: '<abc b="ab"></abc>'
+    };
+
+    const doc: Document = parser.parse(opts.sourceStr);
+    const result = doc.getElementsByTagName('a');
+    doc.firstChild!.removeChild(result[0]);
+    const newXmlStr: string = generator.generate(doc, { format: false });
+    expect(newXmlStr).eq(opts.targetStr);
+  });
+
+  it('Node: previousSibling', () => {
+    const opts = {
+      sourceStr: '<hello /><abc b="ab"></abc>'
+    };
+
+    const doc: Document = parser.parse(opts.sourceStr);
+    const previousSibling = doc.lastChild!.previousSibling;
+    expect((previousSibling as Element).tagName).eq('hello');
+  });
+
+  it('Node: previousElementSibling', () => {
+    const opts = {
+      sourceStr: '<hello />abc<abc b="ab"></abc>'
+    };
+
+    const doc: Document = parser.parse(opts.sourceStr);
+    const previousElementSibling = doc.lastChild!.previousElementSibling;
+    expect(previousElementSibling!.tagName).eq('hello');
+  });
+
+  it('Node: nextSibling', () => {
+    const opts = {
+      sourceStr: '<hello />abc<abc b="ab"><w/></abc>'
+    };
+
+    const doc: Document = parser.parse(opts.sourceStr);
+    const nextSibling = doc.firstChild!.nextSibling;
+    expect(nextSibling!.nodeType).eq('text');
+  });
+
+  it('Node: nextElementSibling', () => {
+    const opts = {
+      sourceStr: '<hello />abc<abc b="ab">xx</abc>'
+    };
+
+    const doc: Document = parser.parse(opts.sourceStr);
+    const nextElementSibling = doc.firstChild!.nextElementSibling;
+    expect(nextElementSibling!.tagName).eq('abc');
   });
 });
