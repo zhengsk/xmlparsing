@@ -38,61 +38,12 @@ export class Node {
     public parentNode?: Node | null;
 
     public selfClosing?: boolean;
-
-    public stats?: EventValue; // data from xml string parse
+    public stats?: EventValue;
 
     constructor(type: NodeType, stats: EventValue) {
         this.nodeType = type;
 
         this.stats = stats;
-    }
-
-    // firstChild
-    public get firstChild(): Node | null {
-        return (this.children && this.children[0]) || null;
-    }
-
-    // lastChild
-    public get lastChild(): Node | null {
-        return (this.children && this.children[this.children.length - 1]) || null;
-    }
-
-    // previousSibling
-    public get previousSibling(): Node | null {
-        const node = null;
-        if (this.parentNode) {
-            const index = this.parentNode.children!.indexOf(this);
-            return this.parentNode.children![index - 1] || node;
-        }
-        return node;
-    }
-
-    // previousElementSibling
-    public get previousElementSibling(): Element | null {
-        let node = null;
-        do {
-            node = this.previousSibling;
-        } while (node && node.nodeType !== 'element');
-        return node as Element;
-    }
-
-    // nextSibling
-    public get nextSibling(): Node | null {
-        const node = null;
-        if (this.parentNode) {
-            const index = this.parentNode.children!.indexOf(this);
-            return this.parentNode.children![index + 1] || node;
-        }
-        return node;
-    }
-
-    // nextElementSibling
-    public get nextElementSibling(): Element | null {
-        let node = null
-        do {
-            node = this.nextSibling;
-        } while (node && node.nodeType !== 'element');
-        return node as Element;
     }
 
     // attribute operator
@@ -114,6 +65,16 @@ export class Node {
         if (this.attributs) {
             this.attributs.remove(name);
         }
+    }
+
+    // firstChild
+    public get firstChild(): Node | null {
+        return (this.children && this.children[0]) || null;
+    }
+
+    // lastChild
+    public get lastChild(): Node | null {
+        return (this.children && this.children[this.children.length - 1]) || null;
     }
 
     // children operate
@@ -152,6 +113,44 @@ export class Node {
             return node;
         }
         throw new Error('The node to be removed is not a child of this node.');
+    }
+
+    // previousSibling
+    get previousSibling(): Node | null {
+        const node = null;
+        if (this.parentNode) {
+            const index = this.parentNode.children!.indexOf(this);
+            return this.parentNode.children![index - 1] || node;
+        }
+        return node;
+    }
+
+    // previousElementSibling
+    get previousElementSibling(): Element | null {
+        let node = null;
+        do {
+            node = this.previousSibling;
+        } while (node && node.nodeType !== 'element');
+        return node as Element;
+    }
+
+    // nextSibling
+    get nextSibling(): Node | null {
+        const node = null;
+        if (this.parentNode) {
+            const index = this.parentNode.children!.indexOf(this);
+            return this.parentNode.children![index + 1] || node;
+        }
+        return node;
+    }
+
+    // nextElementSibling
+    get nextElementSibling(): Element | null {
+        let node = null
+        do {
+            node = this.nextSibling;
+        } while (node && node.nodeType !== 'element');
+        return node as Element;
     }
 }
 
