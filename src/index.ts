@@ -7,7 +7,4 @@ import generator from './generator';
 // const ast: Document = parser.parse(xmlStr);
 // const newXmlStr: string = generator.generate(ast, { format: true });
 
-export default {
-  parser,
-  generator
-};
+export { parser, generator };
