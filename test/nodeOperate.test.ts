@@ -29,12 +29,32 @@ describe('Node operate', () => {
 
   it('Attribute: get', () => {
     const opts = {
+      sourceStr: '<abc b="ab" booleanValue></abc>'
+    };
+
+    const doc: Document = parser.parse(opts.sourceStr);
+    expect(doc.firstChild!.getAttribute('b')).eq('ab');
+    expect(doc.firstChild!.getAttribute('w')).eq(undefined);
+    expect(doc.firstChild!.getAttribute('booleanValue')).eq(null);
+  });
+
+  it('Attribute: has', () => {
+    const opts = {
       sourceStr: '<abc b="ab"></abc>'
     };
 
     const doc: Document = parser.parse(opts.sourceStr);
-    const attrValue = doc.firstChild!.getAttribute('b');
-    expect(attrValue).eq('ab');
+    expect(doc.firstChild!.hasAttribute('b')).eq(true);
+    expect(doc.firstChild!.hasAttribute('c')).eq(false);
+  });
+
+  it('Attribute: length', () => {
+    const opts = {
+      sourceStr: '<abc x b="ab" w= ></abc>'
+    };
+
+    const doc: Document = parser.parse(opts.sourceStr);
+    expect(doc.firstChild!.attributes!.length).eq(3);
   });
 
   it('Attribute: set', () => {
@@ -57,6 +77,19 @@ describe('Node operate', () => {
 
     const doc: Document = parser.parse(opts.sourceStr);
     doc.firstChild!.removeAttribute('b');
+    const newXmlStr: string = generator.generate(doc, { format: false });
+    expect(newXmlStr).eq(opts.targetStr);
+  });
+
+  it('Attribute: modify', () => {
+    const opts = {
+      sourceStr: '<abc b="ab"></abc>',
+      targetStr: '<abc aaa="aabb"></abc>'
+    };
+
+    const doc: Document = parser.parse(opts.sourceStr);
+    doc.firstChild!.modifyAttribute('b', 'bbb');
+    doc.firstChild!.modifyAttribute('bbb', 'aaa', 'aabb');
     const newXmlStr: string = generator.generate(doc, { format: false });
     expect(newXmlStr).eq(opts.targetStr);
   });

@@ -1,28 +1,83 @@
 import { EventValue } from '../types/tokenizer';
 
 type NodeType = 'document' | 'element' | 'text' | 'comment' | 'cdata';
-type Func = (name: string, value: string | null) => void;
+type Func = (key: string, value: string | null) => void;
+
+class Attribute {
+  public key: string;
+  public value: string | null;
+
+  constructor(key: string, value: string | null) {
+    this.key = key;
+    this.value = value;
+  }
+}
 
 // AttributeList
 export class AttributeList {
-  [key: string]: string | Map<string, string | null> | null | Func;
-  public attributes: Map<string, string | null> = new Map();
+  [key: string]:
+    | string
+    | Attribute[]
+    | null
+    | Func
+    | Attribute
+    | number
+    | object;
 
-  public get(name: string): string | null {
-    if (this.attributes.has(name)) {
-      return this[name] as string | null;
+  public attributes: Attribute[] = [];
+  private object: { [key: string]: Attribute } = {};
+
+  public get length() {
+    return this.attributes.length;
+  }
+
+  public getIndex(key: string) {
+    let index = -1;
+    if (this.object.hasOwnProperty(key)) {
+      const attri = this.object[key];
+      index = this.attributes.indexOf(attri as Attribute);
+    }
+    return index;
+  }
+
+  public has(key: string): boolean {
+    return this.getIndex(key) !== -1;
+  }
+
+  public get(key: string): Attribute | null {
+    if (this.has(key)) {
+      return this.object[key] as Attribute;
     }
     return null;
   }
 
-  public set(name: string, value: string | null) {
-    this.attributes.set(name, value);
-    this[name] = value;
+  public set(key: string, value: string | null) {
+    const attr = new Attribute(key, value);
+    this.attributes.push(attr);
+    this.object[key] = attr;
   }
 
-  public remove(name: string) {
-    this.attributes.delete(name);
-    delete this[name];
+  public remove(key: string): Attribute | null {
+    const index = this.getIndex(key);
+    let result = null;
+    if (index !== -1) {
+      delete this.object[key];
+      result = this.attributes.splice(index, 1)[0];
+    }
+    return result;
+  }
+
+  public modify(key: string, newKey: string, newValue?: string) {
+    const attri = this.get(key);
+    if (attri) {
+      attri.key = newKey;
+      this.object[newKey] = this.object[key];
+      delete this.object[key];
+
+      if (newValue) {
+        attri.value = newValue;
+      }
+    }
   }
 }
 
@@ -46,23 +101,34 @@ export class Node {
   }
 
   // attribute operator
-  public getAttribute(name: string): string | null {
-    if (this.attributes) {
-      return this.attributes.get(name)! as string | null;
+  public getAttribute(key: string): string | null | undefined {
+    let value;
+    if (this.attributes && this.attributes.get(key)) {
+      value = this.attributes.get(key)!.value;
     }
-    return null;
+    return value;
   }
 
-  public setAttribute(name: string, value: string | null) {
+  public setAttribute(key: string, value: string | null) {
     if (!this.attributes) {
       this.attributes = new AttributeList();
     }
-    this.attributes.set(name, value);
+    this.attributes.set(key, value);
   }
 
-  public removeAttribute(name: string) {
+  public removeAttribute(key: string) {
     if (this.attributes) {
-      this.attributes.remove(name);
+      this.attributes.remove(key);
+    }
+  }
+
+  public hasAttribute(key: string) {
+    return this.attributes && this.attributes.has(key);
+  }
+
+  public modifyAttribute(key: string, newKey: string, newValue?: string) {
+    if (this.attributes) {
+      this.attributes.modify(key, newKey, newValue);
     }
   }
 
