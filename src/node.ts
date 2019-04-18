@@ -6,22 +6,22 @@ type Func = (name: string, value: string | null) => void;
 // AttributeList
 export class AttributeList {
   [key: string]: string | Map<string, string | null> | null | Func;
-  public attributs: Map<string, string | null> = new Map();
+  public attributes: Map<string, string | null> = new Map();
 
   public get(name: string): string | null {
-    if (this.attributs.has(name)) {
+    if (this.attributes.has(name)) {
       return this[name] as string | null;
     }
     return null;
   }
 
   public set(name: string, value: string | null) {
-    this.attributs.set(name, value);
+    this.attributes.set(name, value);
     this[name] = value;
   }
 
   public remove(name: string) {
-    this.attributs.delete(name);
+    this.attributes.delete(name);
     delete this[name];
   }
 }
@@ -31,7 +31,7 @@ export class Node {
   public nodeType: NodeType;
   public nodeValue?: string | null = null;
 
-  public attributs?: AttributeList | null;
+  public attributes?: AttributeList | null;
 
   public children: Node[] | undefined;
   public parentNode?: Node | null;
@@ -47,22 +47,22 @@ export class Node {
 
   // attribute operator
   public getAttribute(name: string): string | null {
-    if (this.attributs) {
-      return this.attributs.get(name)! as string | null;
+    if (this.attributes) {
+      return this.attributes.get(name)! as string | null;
     }
     return null;
   }
 
   public setAttribute(name: string, value: string | null) {
-    if (!this.attributs) {
-      this.attributs = new AttributeList();
+    if (!this.attributes) {
+      this.attributes = new AttributeList();
     }
-    this.attributs.set(name, value);
+    this.attributes.set(name, value);
   }
 
   public removeAttribute(name: string) {
-    if (this.attributs) {
-      this.attributs.remove(name);
+    if (this.attributes) {
+      this.attributes.remove(name);
     }
   }
 
