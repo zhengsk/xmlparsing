@@ -30,9 +30,9 @@ function elementStringify(element: Element) {
     result += formatStr() + '<' + (element as Element).tagName;
 
     // Get attribute string
-    if (element.attributs && element.attributs.attributs.size) {
+    if (element.attributes) {
       let attrStr = '';
-      element.attributs.attributs.forEach((value, key) => {
+      element.attributes.attributes.forEach(({ key, value }) => {
         attrStr += ' ' + key;
         if (value !== null) {
           attrStr += `="${value}"`;

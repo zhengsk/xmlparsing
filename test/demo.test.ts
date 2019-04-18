@@ -21,7 +21,7 @@ describe('Test', () => {
     tokenizer.parse();
   });
 
-  it('Attribut without quotes', () => {
+  it('Attribute without quotes', () => {
     const tokenizer = new Tokenizer('<a href=33 />', {
       attributeValue(token) {
         expect(token.value).to.equal('33');

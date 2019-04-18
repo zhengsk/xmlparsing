@@ -1,17 +1,45 @@
 {
   "name": "xmlparsing",
-  "version": "0.0.1",
+  "version": "0.0.6",
   "description": "xml parsing",
-  "main": "index.js",
+  "main": "./build/index.js",
   "scripts": {
-    "test": "mocha --require ts-node/register ./test/**/*.ts"
+    "test": "nyc --reporter=text mocha --require ts-node/register ./test/**/*.ts",
+    "test:report": "nyc mocha --require ts-node/register ./test/**/*.ts"
   },
   "author": "zsk526",
+  "files": [
+    "build/**/*.js"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:zhengsk/xmlparsing.git"
+  },
   "license": "ISC",
   "husky": {
     "hooks": {
       "pre-commit": "npm test"
     }
+  },
+  "nyc": {
+    "include": [
+      "src/**/*.ts"
+    ],
+    "exclude": [
+      "test/**/*.test.ts"
+    ],
+    "extension": [
+      ".ts"
+    ],
+    "require": [
+      "ts-node/register"
+    ],
+    "reporter": [
+      "text",
+      "html"
+    ],
+    "sourceMap": true,
+    "instrument": true
   },
   "devDependencies": {
     "@types/chai": "^4.1.7",
