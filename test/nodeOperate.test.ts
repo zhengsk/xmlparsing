@@ -169,4 +169,24 @@ describe('Node operate', () => {
     const nextElementSibling = doc.firstChild!.nextElementSibling;
     expect(nextElementSibling!.tagName).eq('abc');
   });
+
+  it('Node: forEachAttribute', () => {
+    const opts = {
+      sourceStr: '<hello a=3 b c=4 d="5" />'
+    };
+
+    const doc: Document = parser.parse(opts.sourceStr);
+    const helloElement = doc.firstChild!;
+    helloElement.forEachAttributes((attribute, index) => {
+      if (index === 0) {
+        expect(attribute.key).eq('a');
+        expect(attribute.value).eq('3');
+      }
+
+      if (index === 3) {
+        expect(attribute.key).eq('d');
+        expect(attribute.value).eq('5');
+      }
+    });
+  });
 });

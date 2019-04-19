@@ -11,6 +11,18 @@ class Attribute {
     this.key = key;
     this.value = value;
   }
+
+  public get isBoolean(): boolean {
+    return this.value === null;
+  }
+
+  public setKey(key: string) {
+    this.key = key;
+  }
+
+  public setValue(value: string) {
+    this.value = value;
+  }
 }
 
 // AttributeList
@@ -79,6 +91,19 @@ export class AttributeList {
       }
     }
   }
+
+  public forEach(
+    func: (
+      attribute: Attribute,
+      index: number,
+      attributes: Attribute[]
+    ) => void,
+    context: any = null
+  ) {
+    this.attributes.forEach((attribute, index, attributes) => {
+      func.call(context, attribute, index, attributes);
+    });
+  }
 }
 
 // Node
@@ -98,6 +123,16 @@ export class Node {
     this.nodeType = type;
 
     this.stats = stats;
+  }
+
+  // firstChild
+  public get firstChild(): Node | null {
+    return (this.children && this.children[0]) || null;
+  }
+
+  // lastChild
+  public get lastChild(): Node | null {
+    return (this.children && this.children[this.children.length - 1]) || null;
   }
 
   // attribute operator
@@ -132,14 +167,17 @@ export class Node {
     }
   }
 
-  // firstChild
-  public get firstChild(): Node | null {
-    return (this.children && this.children[0]) || null;
-  }
-
-  // lastChild
-  public get lastChild(): Node | null {
-    return (this.children && this.children[this.children.length - 1]) || null;
+  public forEachAttributes(
+    func: (
+      attribute: Attribute,
+      index: number,
+      attributes: Attribute[]
+    ) => void,
+    context: any = null
+  ) {
+    if (this.attributes) {
+      this.attributes.forEach(func, context);
+    }
   }
 
   // children operate
