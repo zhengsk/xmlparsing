@@ -69,6 +69,17 @@ describe('Generator', () => {
 
   itCase(
     {
+      title: 'format xml without children',
+      sourceStr: '<a></a>',
+      targetStr: `<a></a>`
+    },
+    {
+      format: true
+    }
+  );
+
+  itCase(
+    {
       title: 'format with tab',
       sourceStr: '<a><br/></a>',
       targetStr: `<a>\n\t<br/>\n</a>`

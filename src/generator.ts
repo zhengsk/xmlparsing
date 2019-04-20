@@ -64,7 +64,10 @@ function elementStringify(element: Element) {
     }
 
     // close element
-    if (element.lastChild && element.lastChild.nodeType === 'text') {
+    if (
+      !element.lastChild ||
+      (element.lastChild && element.lastChild.nodeType === 'text')
+    ) {
       result += `</${element.tagName}>`;
     } else {
       result += formatStr() + `</${element.tagName}>`;
