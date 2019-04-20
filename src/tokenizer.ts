@@ -368,7 +368,6 @@ export class Tokenizer {
   // state: attrEqual
   private stateAttrEqual(char: string) {
     if (this.isEmptyChar(char)) {
-      this.current = char;
       return;
     }
 
