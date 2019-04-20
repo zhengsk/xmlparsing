@@ -4,9 +4,10 @@ import { format } from 'util';
 // format indent
 let isFirstFormat = true;
 let indentLen = 0;
-let indentStr: string | boolean = '  '; // 缩进
+let indentStr: string | boolean = '  '; // element indent
+let attributeNewline: boolean | undefined = false; // attribute in new line
 
-function formatStr() {
+function formatStr(indent: number = 0) {
   // remove first newline '\n'
   if (isFirstFormat) {
     isFirstFormat = false;
@@ -14,7 +15,7 @@ function formatStr() {
   }
 
   if (typeof indentStr === 'string') {
-    return `\n${indentStr.repeat(indentLen)}`;
+    return `\n${indentStr.repeat(indent || indentLen)}`;
   } else {
     return '';
   }
@@ -33,11 +34,15 @@ function elementStringify(element: Element) {
     if (element.attributes) {
       let attrStr = '';
       element.attributes.attributes.forEach(({ key, value }) => {
-        attrStr += ' ' + key;
+        attrStr += (attributeNewline ? formatStr(indentLen + 1) : ' ') + key;
         if (value !== null) {
           attrStr += `="${value}"`;
         }
       });
+
+      if (attributeNewline) {
+        attrStr += formatStr(indentLen);
+      }
       result += attrStr;
     }
 
@@ -89,7 +94,14 @@ function elementStringify(element: Element) {
 
 function generate(
   ast: Document,
-  options: { format: string | boolean } = { format: false }
+  options: {
+    format: string | boolean;
+    attributeNewline?: boolean | undefined;
+    // closingBracketNewline?: boolean;
+  } = {
+    format: false,
+    attributeNewline: false
+  }
 ): string {
   if (options.format) {
     if (typeof options.format === 'string') {
@@ -98,6 +110,9 @@ function generate(
   } else {
     indentStr = false;
   }
+
+  attributeNewline = options.attributeNewline;
+
   let result: string = '';
   if (ast.nodeType === 'document') {
     const element = ast;
