@@ -1,6 +1,6 @@
 {
   "name": "xmlparsing",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "xml parsing",
   "main": "./build/index.js",
   "scripts": {
