@@ -38,6 +38,7 @@ describe('Generator', () => {
     targetStr: '<a></a>'
   });
 
+  // Attribute
   itCase({
     title: 'Element width attribute',
     sourceStr: '<abc b = "hello"></abc>',
@@ -62,6 +63,7 @@ describe('Generator', () => {
     targetStr: `<a><br/></a>`
   });
 
+  // format
   itCase(
     {
       title: 'format xml',
@@ -107,6 +109,7 @@ describe('Generator', () => {
     }
   );
 
+  // self-closing
   itCase({
     title: 'Self-closing',
     sourceStr: '<a/>',

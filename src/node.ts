@@ -64,9 +64,15 @@ export class AttributeList {
   }
 
   public set(key: string, value: string | null) {
-    const attr = new Attribute(key, value);
-    this.attributes.push(attr);
-    this.object[key] = attr;
+    let attr: Attribute;
+    if (this.object.hasOwnProperty(key)) {
+      attr = this.object[key];
+      attr.value = value;
+    } else {
+      attr = new Attribute(key, value);
+      this.attributes.push(attr);
+      this.object[key] = attr;
+    }
   }
 
   public remove(key: string): Attribute | null {

@@ -60,11 +60,12 @@ describe('Node operate', () => {
   it('Attribute: set', () => {
     const opts = {
       sourceStr: '<abc b="ab"></abc>',
-      targetStr: '<abc b="ab" class="newClass"></abc>'
+      targetStr: '<abc b="newAb" class="newClass"></abc>'
     };
 
     const doc: Document = parser.parse(opts.sourceStr);
     doc.firstChild!.setAttribute('class', 'newClass');
+    doc.firstChild!.setAttribute('b', 'newAb');
     const newXmlStr: string = generator.generate(doc, { format: false });
     expect(newXmlStr).eq(opts.targetStr);
   });
