@@ -302,7 +302,7 @@ export class Node {
   // traverse
   public traverse(callback: (node: Node) => void) {
     if (this.children && this.children.length) {
-      this.children.forEach(element => {
+      [...this.children].forEach(element => {
         callback(element);
         element.traverse(callback); // recursive
       });
