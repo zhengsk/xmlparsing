@@ -1,9 +1,9 @@
 export interface EventValue {
-  index: number;
-  startIndex: number;
-  column: number;
-  row: number;
-  value: null | string;
+  index?: number;
+  startIndex?: number;
+  column?: number;
+  row?: number;
+  value?: null | string;
   name?: string; // just for attribute
   selfClosing?: boolean;
 }

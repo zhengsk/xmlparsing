@@ -47,7 +47,10 @@ function elementStringify(element: Element) {
     }
 
     // selfClosing
-    if (element.selfClosing) {
+    if (
+      element.selfClosing &&
+      !(element.children && element.children.length !== 0)
+    ) {
       result += '/>';
       return result;
     } else {

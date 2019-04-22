@@ -308,6 +308,25 @@ export class Node {
       });
     }
   }
+
+  // create element
+  public createElement(tagName: string) {
+    return new Element({
+      value: tagName
+    });
+  }
+
+  public createComment(data: string) {
+    return new Comment({
+      value: data
+    });
+  }
+
+  public createTextNode(data: string) {
+    return new Text({
+      value: data
+    });
+  }
 }
 
 // Text Node

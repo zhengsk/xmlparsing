@@ -159,6 +159,47 @@ describe('Node operate', () => {
     expect(newXmlStr).eq(opts.targetStr);
   });
 
+  // create element
+  it('Node: createElement', () => {
+    const opts = {
+      sourceStr: '<hello/>',
+      targetStr: '<hello/><a x="33"></a>'
+    };
+
+    const doc: Document = parser.parse(opts.sourceStr);
+    const aElem = doc.createElement('a');
+    aElem.setAttribute('x', '33');
+    doc.appendChild(aElem);
+    const newXmlStr: string = generator.generate(doc, { format: false });
+    expect(newXmlStr).eq(opts.targetStr);
+  });
+
+  it('Node: createTextNode', () => {
+    const opts = {
+      sourceStr: '<hello/>',
+      targetStr: '<hello>text text</hello>'
+    };
+
+    const doc: Document = parser.parse(opts.sourceStr);
+    const textElem = doc.createTextNode('text text');
+    doc.firstChild!.appendChild(textElem);
+    const newXmlStr: string = generator.generate(doc, { format: false });
+    expect(newXmlStr).eq(opts.targetStr);
+  });
+
+  it('Node: createComment', () => {
+    const opts = {
+      sourceStr: '<hello/>',
+      targetStr: '<hello><!--comment text--></hello>'
+    };
+
+    const doc: Document = parser.parse(opts.sourceStr);
+    const commentElem = doc.createComment('comment text');
+    doc.firstChild!.appendChild(commentElem);
+    const newXmlStr: string = generator.generate(doc, { format: false });
+    expect(newXmlStr).eq(opts.targetStr);
+  });
+
   it('Node: previousSibling', () => {
     const opts = {
       sourceStr: '<hello /><abc b="ab"></abc>'
