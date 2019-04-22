@@ -197,19 +197,36 @@ export class Node {
   }
 
   // insertBefore
-  public insertBefore(newNode: Node, referenceNode: Node | null): Node {
-    if (!this.children) {
-      this.children = [];
+  public insertBefore(newNode: Node, referenceNode: Node): Node {
+    const index = (this.children || []).indexOf(referenceNode);
+    if (index !== -1) {
+      this.insertElement(newNode, index);
+      return newNode;
+    } else {
+      throw new Error('insertBefore: referenceNode is not node children.');
+    }
+  }
+
+  // insertAfter
+  public insertAfter(newNode: Node, referenceNode: Node): Node {
+    const index = (this.children || []).indexOf(referenceNode);
+    if (index !== -1) {
+      this.insertElement(newNode, index + 1);
+      return newNode;
+    } else {
+      throw new Error('insertAfter: referenceNode is not node children.');
+    }
+  }
+
+  // insertElement
+  public insertElement(newNode: Node, index: number): Node {
+    const children = this.children || [];
+    children.splice(index, 0, newNode);
+
+    if (newNode.parentNode) {
+      newNode.parentNode.removeChild(newNode);
     }
     newNode.parentNode = this;
-    // @TODO: should be removed from parentNode chidrens.
-
-    if (referenceNode === null) {
-      return this.appendChild(newNode);
-    }
-
-    const index = this.children.indexOf(referenceNode);
-    this.children.splice(index, 0, newNode);
     return newNode;
   }
 
@@ -221,7 +238,7 @@ export class Node {
       delete node.parentNode;
       return node;
     }
-    throw new Error('The node to be removed is not a child of this node.');
+    throw new Error('removeChild: the node is not a child of this node.');
   }
 
   // clone
