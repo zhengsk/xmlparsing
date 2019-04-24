@@ -25,6 +25,16 @@ function formatStr(indent: number = 0) {
 function elementStringify(element: Element) {
   let result: string = '';
 
+  // document
+  if (element.nodeType === 'document') {
+    if (element.children && element.children!.length) {
+      element.children!.forEach(elem => {
+        result += elementStringify(elem as Element);
+      });
+    }
+    return result;
+  }
+
   // element
   if (element.nodeType === 'element') {
     // start element
@@ -96,6 +106,8 @@ function elementStringify(element: Element) {
     result += formatStr() + `<![CDATA[${element.nodeValue}]]>`;
     return result;
   }
+
+  return result;
 }
 
 function generate(
@@ -119,15 +131,7 @@ function generate(
 
   attributeNewline = options.attributeNewline;
 
-  let result: string = '';
-  if (ast.nodeType === 'document') {
-    const element = ast;
-    if (element.children && element.children!.length) {
-      element.children!.forEach(elem => {
-        result += elementStringify(elem as Element);
-      });
-    }
-  }
+  const result = elementStringify(ast as Element);
 
   // reset
   isFirstFormat = true;
