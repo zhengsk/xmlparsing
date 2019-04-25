@@ -383,14 +383,6 @@ export class Tokenizer {
 
     // support attribute value without quotes.
     if (this.attributeValueWithoutQuotes) {
-      if (this.isEmptyChar(this.current)) {
-        this.emit('attributeValue', { booleanValue: true });
-        this.current = '';
-        this.state = State.attrNameStart;
-        this.feed(-1);
-        return;
-      }
-
       while (this.index < this.maxIndex) {
         if (char === '>') {
           this.emit('attributeValue');

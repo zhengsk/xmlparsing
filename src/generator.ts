@@ -5,7 +5,7 @@ import { format } from 'util';
 let isFirstFormat = true;
 let indentLen = 0;
 let indentStr: string | boolean = '  '; // element indent
-let attributeNewline: boolean | undefined = false; // attribute in new line
+let attributeNewline: boolean | number = false; // attribute in new line
 
 function formatStr(indent: number = 0) {
   // remove first newline '\n'
@@ -43,14 +43,18 @@ function elementStringify(element: Element) {
     // Get attribute string
     if (element.attributes) {
       let attrStr = '';
-      element.attributes.attributes.forEach(({ key, value }) => {
-        attrStr += (attributeNewline ? formatStr(indentLen + 1) : ' ') + key;
-        if (value !== null) {
+      let inNewLine = false;
+      if (attributeNewline && element.attributes.length >= attributeNewline) {
+        inNewLine = true;
+      }
+      element.attributes.forEach(({ key, value, isBoolean }) => {
+        attrStr += (inNewLine ? formatStr(indentLen + 1) : ' ') + key;
+        if (!isBoolean) {
           attrStr += `="${value}"`;
         }
       });
 
-      if (attributeNewline) {
+      if (inNewLine) {
         attrStr += formatStr(indentLen);
       }
       result += attrStr;
@@ -114,7 +118,7 @@ function generate(
   ast: Document,
   options: {
     format: string | boolean;
-    attributeNewline?: boolean | undefined;
+    attributeNewline?: boolean | number;
     // closingBracketNewline?: boolean;
   } = {
     format: false,
@@ -129,7 +133,11 @@ function generate(
     indentStr = false;
   }
 
-  attributeNewline = options.attributeNewline;
+  if (typeof options.attributeNewline === 'boolean') {
+    attributeNewline = options.attributeNewline ? 1 : 0;
+  } else {
+    attributeNewline = options.attributeNewline || 0;
+  }
 
   const result = elementStringify(ast as Element);
 

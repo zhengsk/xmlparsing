@@ -12,7 +12,10 @@ function itCase(
     sourceStr: string;
     targetStr: string;
   },
-  generateOpts: { format: boolean | string; attributeNewline?: boolean } = {
+  generateOpts: {
+    format: boolean | string;
+    attributeNewline?: boolean | number;
+  } = {
     format: false,
     attributeNewline: false
   }
@@ -38,6 +41,17 @@ describe('Generator', () => {
     targetStr: '<a></a>'
   });
 
+  itCase({
+    title: 'Element xml multiple line',
+    sourceStr: `<a>
+    <b>
+      < c x=33 />
+      <d  xyz/>
+    </b>
+</a>`,
+    targetStr: '<a><b><c x="33"/><d xyz/></b></a>'
+  });
+
   // Attribute
   itCase({
     title: 'Element width attribute',
@@ -53,8 +67,8 @@ describe('Generator', () => {
 
   itCase({
     title: 'Element attribute without quotes',
-    sourceStr: '<abc a=33></abc>',
-    targetStr: '<abc a="33"></abc>'
+    sourceStr: '<abc a=33><b xx= abc yy= efg/></abc>',
+    targetStr: '<abc a="33"><b xx="abc" yy="efg"/></abc>'
   });
 
   itCase({
@@ -106,6 +120,18 @@ describe('Generator', () => {
     {
       format: true,
       attributeNewline: true
+    }
+  );
+
+  itCase(
+    {
+      title: 'format with attributeNewline >= 2',
+      sourceStr: '<a x="33"><br/></a><w a="x" b="y" />',
+      targetStr: `<a x="33">\n  <br/>\n</a>\n<w\n  a="x"\n  b="y"\n/>`
+    },
+    {
+      format: true,
+      attributeNewline: 2
     }
   );
 
