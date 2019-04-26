@@ -25,3 +25,8 @@ export type EventNames =
 export type Events = {
   [propName in EventNames]?: (opts: EventValue, err?: Error) => void
 };
+
+export type GenerateOptions = {
+  format?: string | boolean;
+  attributeNewline?: boolean | number;
+};

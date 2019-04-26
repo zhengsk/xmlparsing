@@ -1,4 +1,6 @@
-import { EventValue } from '../types/tokenizer';
+import { EventValue, GenerateOptions } from '../types/tokenizer';
+import parser from './parser';
+import generator from './generator';
 
 type NodeType = 'document' | 'element' | 'text' | 'comment' | 'cdata';
 type Func = (key: string, value: string | null) => void;
@@ -241,10 +243,69 @@ export class Node {
     throw new Error('removeChild: the node is not a child of this node.');
   }
 
+  // remove self
+  public remove(): Node {
+    this.parentNode!.removeChild(this);
+    return this;
+  }
+
+  // empty: remove all children node
+  public empty(): Node[] {
+    const children: Node[] = [];
+    if (this.children) {
+      while (this.children.length) {
+        children.push(this.children[0].remove());
+      }
+    }
+    return children;
+  }
+
   // clone
   public cloneNode(deep: boolean = false): Node {
     // @TODO: implement
     return this;
+  }
+
+  // toString
+  public toString(options?: GenerateOptions): string {
+    return generator.generate(this, options);
+  }
+
+  // outerXML
+  get outerXML(): string {
+    return this.toString();
+  }
+
+  set outerXML(xmlString: string) {
+    const doc = parser.parse(xmlString);
+    if (doc.children) {
+      [...doc.children].forEach(elem => {
+        this.parentNode!.insertBefore(elem, this);
+      });
+      this.remove();
+    }
+  }
+
+  // innerXML
+  get innerXML(): string {
+    let result = '';
+    if (this.children) {
+      const childrenStrs = this.children.map(node => {
+        return node.toString();
+      });
+      result = childrenStrs.join('\n');
+    }
+    return result;
+  }
+
+  set innerXML(xmlString: string) {
+    const doc = parser.parse(xmlString);
+    this.empty();
+    if (doc.children) {
+      doc.children.forEach(elem => {
+        this.appendChild(elem);
+      });
+    }
   }
 
   // previousSibling

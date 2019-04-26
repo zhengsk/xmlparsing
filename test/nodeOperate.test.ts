@@ -66,7 +66,7 @@ describe('Node operate', () => {
     const doc: Document = parser.parse(opts.sourceStr);
     doc.firstChild!.setAttribute('class', 'newClass');
     doc.firstChild!.setAttribute('b', 'newAb');
-    const newXmlStr: string = generator.generate(doc, { format: false });
+    const newXmlStr: string = generator.generate(doc);
     expect(newXmlStr).eq(opts.targetStr);
   });
 
@@ -78,7 +78,7 @@ describe('Node operate', () => {
 
     const doc: Document = parser.parse(opts.sourceStr);
     doc.firstChild!.removeAttribute('b');
-    const newXmlStr: string = generator.generate(doc, { format: false });
+    const newXmlStr: string = generator.generate(doc);
     expect(newXmlStr).eq(opts.targetStr);
   });
 
@@ -91,7 +91,7 @@ describe('Node operate', () => {
     const doc: Document = parser.parse(opts.sourceStr);
     doc.firstChild!.modifyAttribute('b', 'bbb');
     doc.firstChild!.modifyAttribute('bbb', 'aaa', 'aabb');
-    const newXmlStr: string = generator.generate(doc, { format: false });
+    const newXmlStr: string = generator.generate(doc);
     expect(newXmlStr).eq(opts.targetStr);
   });
 
@@ -128,7 +128,7 @@ describe('Node operate', () => {
     const aElem = doc.getElementsByTagName('a')[0];
     const abcElem = doc.getElementsByTagName('abc')[0];
     doc.insertBefore(aElem, abcElem);
-    const newXmlStr: string = generator.generate(doc, { format: false });
+    const newXmlStr: string = generator.generate(doc);
     expect(newXmlStr).eq(opts.targetStr);
   });
 
@@ -142,7 +142,7 @@ describe('Node operate', () => {
     const aElem = doc.getElementsByTagName('a')[0];
     const abcElem = doc.getElementsByTagName('abc')[0];
     doc.insertAfter(aElem, abcElem);
-    const newXmlStr: string = generator.generate(doc, { format: false });
+    const newXmlStr: string = generator.generate(doc);
     expect(newXmlStr).eq(opts.targetStr);
   });
 
@@ -155,7 +155,33 @@ describe('Node operate', () => {
     const doc: Document = parser.parse(opts.sourceStr);
     const result = doc.getElementsByTagName('a');
     doc.firstChild!.removeChild(result[0]);
-    const newXmlStr: string = generator.generate(doc, { format: false });
+    const newXmlStr: string = generator.generate(doc);
+    expect(newXmlStr).eq(opts.targetStr);
+  });
+
+  it('Node: remove', () => {
+    const opts = {
+      sourceStr: '<abc b="ab"><a>text</a><x/></abc>',
+      targetStr: '<abc b="ab"><x/></abc>'
+    };
+
+    const doc: Document = parser.parse(opts.sourceStr);
+    const aElem = doc.getElementsByTagName('a')[0];
+    aElem.remove();
+    const newXmlStr: string = generator.generate(doc);
+    expect(newXmlStr).eq(opts.targetStr);
+  });
+
+  it('Node: empty', () => {
+    const opts = {
+      sourceStr: '<abc b="ab"><a>text</a><x/></abc>',
+      targetStr: '<abc b="ab"></abc>'
+    };
+
+    const doc: Document = parser.parse(opts.sourceStr);
+    const aElem = doc.getElementsByTagName('abc')[0];
+    aElem.empty();
+    const newXmlStr: string = generator.generate(doc);
     expect(newXmlStr).eq(opts.targetStr);
   });
 
@@ -170,7 +196,7 @@ describe('Node operate', () => {
     const aElem = doc.createElement('a');
     aElem.setAttribute('x', '33');
     doc.appendChild(aElem);
-    const newXmlStr: string = generator.generate(doc, { format: false });
+    const newXmlStr: string = generator.generate(doc);
     expect(newXmlStr).eq(opts.targetStr);
   });
 
@@ -183,7 +209,7 @@ describe('Node operate', () => {
     const doc: Document = parser.parse(opts.sourceStr);
     const textElem = doc.createTextNode('text text');
     doc.firstChild!.appendChild(textElem);
-    const newXmlStr: string = generator.generate(doc, { format: false });
+    const newXmlStr: string = generator.generate(doc);
     expect(newXmlStr).eq(opts.targetStr);
   });
 
@@ -196,7 +222,7 @@ describe('Node operate', () => {
     const doc: Document = parser.parse(opts.sourceStr);
     const commentElem = doc.createComment('comment text');
     doc.firstChild!.appendChild(commentElem);
-    const newXmlStr: string = generator.generate(doc, { format: false });
+    const newXmlStr: string = generator.generate(doc);
     expect(newXmlStr).eq(opts.targetStr);
   });
 
@@ -258,5 +284,51 @@ describe('Node operate', () => {
         expect(attribute.value).eq('5');
       }
     });
+  });
+
+  // Node toString
+  it('Node: toString', () => {
+    const opts = {
+      sourceStr: '<hello><a x="33"/><!--comment text--></hello>',
+      targetStr: '<hello><a x="33"/><!--comment text--></hello>'
+    };
+
+    const doc: Document = parser.parse(opts.sourceStr);
+    const newXmlStr = doc.toString();
+    expect(newXmlStr).eq(opts.targetStr);
+
+    const aStr = doc
+      .getElementsByTagName('a')[0]
+      .toString({ attributeNewline: true });
+    expect(aStr).eq('<a\n  x="33"\n/>');
+  });
+
+  it('Node: innerXML', () => {
+    const opts = {
+      sourceStr: '<hello><a x="33"/><!--comment text--></hello>',
+      targetStr: '<abc x="33"/>'
+    };
+
+    const doc: Document = parser.parse(opts.sourceStr);
+
+    expect(doc.innerXML).eq(opts.sourceStr);
+
+    doc.innerXML = '<abc x="33"/>';
+    const newXmlStr = doc.toString();
+    expect(newXmlStr).eq(opts.targetStr);
+  });
+
+  it('Node: outerXML', () => {
+    const opts = {
+      sourceStr: '<hello><world><a x="33"/><!--comment text--></world></hello>',
+      targetStr: '<world><a x="33"/><!--comment text--></world>'
+    };
+
+    const doc: Document = parser.parse(opts.sourceStr);
+    const worldElem = doc.getElementsByTagName('world')[0];
+    expect(worldElem.outerXML).eq(opts.targetStr);
+
+    worldElem.outerXML = 'abc<br/>';
+    expect(doc.outerXML).eq('<hello>abc<br/></hello>');
   });
 });
