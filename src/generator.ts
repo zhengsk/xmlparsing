@@ -1,11 +1,12 @@
-import { Document, Element, Node } from './node';
-import { format } from 'util';
+import { GenerateOptions } from '../types/tokenizer';
+import { Element, Node } from './node';
 
 // format indent
+const defaultIndentStr: string = '  ';
 let isFirstFormat = true;
 let indentLen = 0;
-let indentStr: string | boolean = '  '; // element indent
-let attributeNewline: boolean | number = false; // attribute in new line
+let indentStr: string | boolean = defaultIndentStr; // element indent
+let isAttributeNewline: boolean | number = false; // attribute in new line
 
 function formatStr(indent: number = 0) {
   // remove first newline '\n'
@@ -22,7 +23,7 @@ function formatStr(indent: number = 0) {
 }
 
 // element stringify
-function elementStringify(element: Element) {
+function elementStringify(element: Node) {
   let result: string = '';
 
   // document
@@ -44,7 +45,10 @@ function elementStringify(element: Element) {
     if (element.attributes) {
       let attrStr = '';
       let inNewLine = false;
-      if (attributeNewline && element.attributes.length >= attributeNewline) {
+      if (
+        isAttributeNewline &&
+        element.attributes.length >= isAttributeNewline
+      ) {
         inNewLine = true;
       }
       element.attributes.forEach(({ key, value, isBoolean }) => {
@@ -85,9 +89,9 @@ function elementStringify(element: Element) {
       !element.lastChild ||
       (element.lastChild && element.lastChild.nodeType === 'text')
     ) {
-      result += `</${element.tagName}>`;
+      result += `</${(element as Element).tagName}>`;
     } else {
-      result += formatStr() + `</${element.tagName}>`;
+      result += formatStr() + `</${(element as Element).tagName}>`;
     }
 
     return result;
@@ -115,36 +119,34 @@ function elementStringify(element: Element) {
 }
 
 function generate(
-  ast: Document,
-  options: {
-    format: string | boolean;
-    attributeNewline?: boolean | number;
-    // closingBracketNewline?: boolean;
-  } = {
-    format: false,
-    attributeNewline: false
-  }
+  ast: Node,
+  { format = false, attributeNewline = false }: GenerateOptions = {}
 ): string {
-  if (options.format) {
-    if (typeof options.format === 'string') {
-      indentStr = options.format;
+  if (format) {
+    if (typeof format === 'string') {
+      indentStr = format;
     }
   } else {
     indentStr = false;
   }
 
-  if (typeof options.attributeNewline === 'boolean') {
-    attributeNewline = options.attributeNewline ? 1 : 0;
+  if (typeof attributeNewline === 'boolean') {
+    isAttributeNewline = attributeNewline ? 1 : 0;
   } else {
-    attributeNewline = options.attributeNewline || 0;
+    isAttributeNewline = attributeNewline || 0;
   }
 
-  const result = elementStringify(ast as Element);
+  // force format be true when attributeNewline is true
+  if (isAttributeNewline && format === false) {
+    indentStr = defaultIndentStr;
+  }
+
+  const result = elementStringify(ast);
 
   // reset
   isFirstFormat = true;
   indentLen = 0;
-  indentStr = '  '; // 缩进
+  indentStr = defaultIndentStr; // indent
 
   return result;
 }
