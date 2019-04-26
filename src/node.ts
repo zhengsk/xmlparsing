@@ -256,9 +256,19 @@ export class Node {
     throw new Error('removeChild: the node is not a child of this node.');
   }
 
+  // replaceWith
+  public replaceWith(node: Node): void {
+    if (this.parentNode) {
+      this.parentNode.insertBefore(node, this);
+      this.remove();
+    }
+  }
+
   // remove self
   public remove(): Node {
-    this.parentNode!.removeChild(this);
+    if (this.parentNode) {
+      this.parentNode.removeChild(this);
+    }
     return this;
   }
 

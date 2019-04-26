@@ -187,6 +187,19 @@ describe('Node operate', () => {
     expect(newXmlStr).eq(opts.targetStr);
   });
 
+  it('Node: replaceWidth', () => {
+    const opts = {
+      sourceStr: '<abc b="ab"><x/></abc>',
+      targetStr: '<abc b="ab"><y></y></abc>'
+    };
+
+    const doc: Document = parser.parse(opts.sourceStr);
+    const yElem = doc.createElement('y');
+    doc.firstChild!.firstChild!.replaceWith(yElem);
+    const newXmlStr: string = generator.generate(doc);
+    expect(newXmlStr).eq(opts.targetStr);
+  });
+
   it('Node: empty', () => {
     const opts = {
       sourceStr: '<abc b="ab"><a>text</a><x/></abc>',
