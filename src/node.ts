@@ -2,7 +2,13 @@ import { EventValue, GenerateOptions } from '../types/tokenizer';
 import parser from './parser';
 import generator from './generator';
 
-type NodeType = 'document' | 'element' | 'text' | 'comment' | 'cdata';
+type NodeType =
+  | 'document'
+  | 'element'
+  | 'text'
+  | 'comment'
+  | 'cdata'
+  | 'fragment';
 type Func = (key: string, value: string | null) => void;
 
 class Attribute {
@@ -129,7 +135,6 @@ export class Node {
 
   constructor(type: NodeType, stats: EventValue) {
     this.nodeType = type;
-
     this.stats = stats;
   }
 
@@ -188,13 +193,33 @@ export class Node {
     }
   }
 
+  // insertElement
+  public insertElement(newNode: Node, index: number): Node {
+    const children = this.children || [];
+    children.splice(index, 0, newNode);
+
+    if (newNode.parentNode) {
+      newNode.parentNode.removeChild(newNode);
+    }
+    newNode.parentNode = this;
+    this.children = children;
+    return newNode;
+  }
+
   // children operate
   public appendChild(node: Node): Node {
-    if (!this.children) {
-      this.children = [];
+    let newNodes: Node[] = [];
+    if (['document', 'fragment'].includes(node.nodeType)) {
+      newNodes = node.children || [];
+    } else {
+      newNodes.push(node);
     }
-    this.children.push(node);
-    node.parentNode = this;
+
+    newNodes.forEach(item => {
+      const index = this.children ? this.children.length : 0;
+      this.insertElement(item, index);
+    });
+
     return node;
   }
 
@@ -218,18 +243,6 @@ export class Node {
     } else {
       throw new Error('insertAfter: referenceNode is not node children.');
     }
-  }
-
-  // insertElement
-  public insertElement(newNode: Node, index: number): Node {
-    const children = this.children || [];
-    children.splice(index, 0, newNode);
-
-    if (newNode.parentNode) {
-      newNode.parentNode.removeChild(newNode);
-    }
-    newNode.parentNode = this;
-    return newNode;
   }
 
   // removeChild
@@ -388,6 +401,10 @@ export class Node {
       value: data
     });
   }
+
+  public createFragment() {
+    return new Fragment();
+  }
 }
 
 // Text Node
@@ -428,5 +445,12 @@ export class Element extends Node {
 export class Document extends Node {
   constructor(stats: EventValue) {
     super('document', stats);
+  }
+}
+
+// Fragment Node
+export class Fragment extends Node {
+  constructor() {
+    super('fragment', {});
   }
 }

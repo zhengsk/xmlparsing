@@ -118,6 +118,21 @@ describe('Node operate', () => {
     expect(result.length).eq(2);
   });
 
+  it('Node: appendChild', () => {
+    const opts = {
+      sourceStr: '<abc b="ab"></abc>',
+      targetStr: '<abc b="ab"><a/></abc>'
+    };
+
+    const doc: Document = parser.parse(opts.sourceStr);
+    const abcElem = doc.getElementsByTagName('abc')[0];
+    const aElem = doc.createElement('a');
+    aElem.selfClosing = true;
+    abcElem.appendChild(aElem);
+    const newXmlStr: string = generator.generate(doc);
+    expect(newXmlStr).eq(opts.targetStr);
+  });
+
   it('Node: insertBefore', () => {
     const opts = {
       sourceStr: '<abc b="ab"><a>text</a></abc>',
@@ -222,6 +237,21 @@ describe('Node operate', () => {
     const doc: Document = parser.parse(opts.sourceStr);
     const commentElem = doc.createComment('comment text');
     doc.firstChild!.appendChild(commentElem);
+    const newXmlStr: string = generator.generate(doc);
+    expect(newXmlStr).eq(opts.targetStr);
+  });
+
+  it('Node: createFragment', () => {
+    const opts = {
+      sourceStr: '<hello/>',
+      targetStr: '<hello><!--comment text--></hello>'
+    };
+
+    const doc: Document = parser.parse(opts.sourceStr);
+    const fragmentElem = doc.createFragment();
+    const commentElem = doc.createComment('comment text');
+    fragmentElem.appendChild(commentElem);
+    doc.firstChild!.appendChild(fragmentElem);
     const newXmlStr: string = generator.generate(doc);
     expect(newXmlStr).eq(opts.targetStr);
   });

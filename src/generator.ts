@@ -27,7 +27,7 @@ function elementStringify(element: Node) {
   let result: string = '';
 
   // document
-  if (element.nodeType === 'document') {
+  if (element.nodeType === 'document' || element.nodeType === 'fragment') {
     if (element.children && element.children!.length) {
       element.children!.forEach(elem => {
         result += elementStringify(elem as Element);
