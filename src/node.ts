@@ -245,6 +245,20 @@ export class Node {
     }
   }
 
+  // before
+  public before(...nodes: Node[]) {
+    const fragment = this.createFragment();
+    fragment.children = nodes;
+    this.parentNode!.insertBefore(fragment, this);
+  }
+
+  // after
+  public after(...nodes: Node[]) {
+    const fragment = this.createFragment();
+    fragment.children = nodes;
+    this.parentNode!.insertAfter(fragment, this);
+  }
+
   // removeChild
   public removeChild(node: Node): Node {
     if (this.children && this.children.includes(node)) {
