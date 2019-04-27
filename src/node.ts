@@ -11,6 +11,11 @@ type NodeType =
   | 'fragment';
 type Func = (key: string, value: string | null) => void;
 
+/**
+ * Attribute: node attribute
+ *
+ * @class Attribute
+ */
 class Attribute {
   public key: string;
   public value: string | null;
@@ -20,14 +25,33 @@ class Attribute {
     this.value = value;
   }
 
+  /**
+   * Check attribute value is boolean value
+   *
+   * @readonly
+   * @type {boolean}
+   * @memberof Attribute
+   */
   public get isBoolean(): boolean {
     return this.value === null;
   }
 
+  /**
+   * Set attribute key
+   *
+   * @param {string} key - new attribute key name
+   * @memberof Attribute
+   */
   public setKey(key: string) {
     this.key = key;
   }
 
+  /**
+   * Set attribute value
+   *
+   * @param {string} value - new attribute value
+   * @memberof Attribute
+   */
   public setValue(value: string) {
     this.value = value;
   }
@@ -234,7 +258,14 @@ export class Node {
     }
   }
 
-  // insertAfter
+  /**
+   * Insert node a new node before given node.
+   *
+   * @param {Node} newNode - a node to be added.
+   * @param {Node} referenceNode - node reference
+   * @returns {Node} - new node
+   * @memberof Node
+   */
   public insertAfter(newNode: Node, referenceNode: Node): Node {
     const index = (this.children || []).indexOf(referenceNode);
     if (index !== -1) {
@@ -245,21 +276,37 @@ export class Node {
     }
   }
 
-  // before
+  /**
+   * Insert nodes before current node.
+   *
+   * @param {...Node[]} nodes - nodes will be inserted.
+   * @memberof Node
+   */
   public before(...nodes: Node[]) {
     const fragment = this.createFragment();
     fragment.children = nodes;
     this.parentNode!.insertBefore(fragment, this);
   }
 
-  // after
+  /**
+   * Insert nodes after current node.
+   *
+   * @param {...Node[]} nodes
+   * @memberof Node
+   */
   public after(...nodes: Node[]) {
     const fragment = this.createFragment();
     fragment.children = nodes;
     this.parentNode!.insertAfter(fragment, this);
   }
 
-  // removeChild
+  /**
+   * Remove element child node.
+   *
+   * @param {Node} node - chilid node to be moved
+   * @returns {Node}
+   * @memberof Node
+   */
   public removeChild(node: Node): Node {
     if (this.children && this.children.includes(node)) {
       const index = this.children.indexOf(node);
