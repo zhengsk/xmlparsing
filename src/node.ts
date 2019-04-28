@@ -284,7 +284,9 @@ export class Node {
    */
   public before(...nodes: Node[]) {
     const fragment = this.createFragment();
-    fragment.children = nodes;
+    nodes.forEach(node => {
+      fragment.appendChild(node);
+    });
     this.parentNode!.insertBefore(fragment, this);
   }
 
@@ -296,7 +298,9 @@ export class Node {
    */
   public after(...nodes: Node[]) {
     const fragment = this.createFragment();
-    fragment.children = nodes;
+    nodes.forEach(node => {
+      fragment.appendChild(node);
+    });
     this.parentNode!.insertAfter(fragment, this);
   }
 
