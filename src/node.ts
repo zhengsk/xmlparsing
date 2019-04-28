@@ -283,11 +283,12 @@ export class Node {
    * @memberof Node
    */
   public before(...nodes: Node[]) {
+    const parentNode = this.parentNode; // store parentNode;
     const fragment = this.createFragment();
     nodes.forEach(node => {
       fragment.appendChild(node);
     });
-    this.parentNode!.insertBefore(fragment, this);
+    parentNode!.insertBefore(fragment, this);
   }
 
   /**
@@ -297,11 +298,12 @@ export class Node {
    * @memberof Node
    */
   public after(...nodes: Node[]) {
+    const parentNode = this.parentNode; // store parentNode;
     const fragment = this.createFragment();
     nodes.forEach(node => {
       fragment.appendChild(node);
     });
-    this.parentNode!.insertAfter(fragment, this);
+    parentNode!.insertAfter(fragment, this);
   }
 
   /**
@@ -323,7 +325,7 @@ export class Node {
 
   // replaceWith
   public replaceWith(node: Node): void {
-    if (this.parentNode) {
+    if (this.parentNode && node !== this) {
       this.parentNode.insertBefore(node, this);
       this.remove();
     }
