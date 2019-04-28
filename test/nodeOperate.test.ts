@@ -132,6 +132,34 @@ describe('Node operate', () => {
     expect(newXmlStr).eq(opts.targetStr);
   });
 
+  it('Node: insertAt before', () => {
+    const opts = {
+      sourceStr: '<abc b="ab"><a>text</a><mn /></abc>',
+      targetStr: '<abc b="ab"><mn/><a>text</a></abc>'
+    };
+
+    const doc: Document = parser.parse(opts.sourceStr);
+    const abcElem = doc.getElementsByTagName('abc')[0];
+    const mnElem = doc.getElementsByTagName('mn')[0];
+    abcElem.insertAt(mnElem, 0);
+    const newXmlStr: string = generator.generate(doc);
+    expect(newXmlStr).eq(opts.targetStr);
+  });
+
+  it('Node: insertAt after', () => {
+    const opts = {
+      sourceStr: '<abc b="ab"><a>text</a><mn />xx</abc>',
+      targetStr: '<abc b="ab"><mn/><a>text</a>xx</abc>'
+    };
+
+    const doc: Document = parser.parse(opts.sourceStr);
+    const abcElem = doc.getElementsByTagName('abc')[0];
+    const aElem = doc.getElementsByTagName('a')[0];
+    abcElem.insertAt(aElem, 1);
+    const newXmlStr: string = generator.generate(doc);
+    expect(newXmlStr).eq(opts.targetStr);
+  });
+
   it('Node: insertBefore', () => {
     const opts = {
       sourceStr: '<abc b="ab"><a>text</a></abc>',
