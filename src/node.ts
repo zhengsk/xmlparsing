@@ -218,32 +218,32 @@ export class Node {
   }
 
   // insertElement
-  public insertElement(newNode: Node, index: number): Node {
+  public insertElement(node: Node, index: number): Node {
     const children = this.children || [];
-    children.splice(index, 0, newNode);
 
-    if (newNode.parentNode) {
-      newNode.parentNode.removeChild(newNode);
-    }
-    newNode.parentNode = this;
-    this.children = children;
-    return newNode;
-  }
-
-  // children operate
-  public appendChild(node: Node): Node {
     let newNodes: Node[] = [];
     if (['document', 'fragment'].includes(node.nodeType)) {
-      newNodes = node.children || [];
+      newNodes = [...(node.children || [])];
     } else {
       newNodes.push(node);
     }
 
-    newNodes.forEach(item => {
-      const index = this.children ? this.children.length : 0;
-      this.insertElement(item, index);
+    newNodes.forEach((newNode, i) => {
+      children.splice(index + i, 0, newNode);
+      if (newNode.parentNode) {
+        newNode.parentNode.removeChild(newNode);
+      }
+      newNode.parentNode = this;
     });
 
+    this.children = children;
+    return node;
+  }
+
+  // children operate
+  public appendChild(node: Node): Node {
+    const index = this.children ? this.children.length : 0;
+    this.insertElement(node, index);
     return node;
   }
 
