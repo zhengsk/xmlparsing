@@ -20,7 +20,9 @@ function itCase(
   }
 ) {
   it(opts.title, () => {
-    const ast: Document = parser.parse(opts.sourceStr);
+    const ast: Document = parser.parse(opts.sourceStr, {
+      plainTextNodes: ['style', 'script']
+    });
     const newXmlStr: string = generator.generate(ast, generateOpts);
 
     expect(newXmlStr).eq(opts.targetStr);

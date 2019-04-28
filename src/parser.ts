@@ -2,7 +2,14 @@ import { Tokenizer } from './tokenizer';
 import { Document, Node, Text, Comment, Cdata, Element } from './node';
 
 // parse
-function parse(xmlStr: string): Document {
+function parse(
+  xmlStr: string,
+  options: {
+    plainTextNodes?: string[];
+    checkElementName?: () => void;
+    checkAttributeName?: () => void;
+  } = {}
+): Document {
   // ast
   const ast = new Document({
     value: 'docuement',
@@ -58,9 +65,7 @@ function parse(xmlStr: string): Document {
         debugger; // tslint:disable-line
       }
     },
-    {
-      plainTextNodes: ['script', 'style']
-    }
+    options
   );
 
   tokenizer.parse(xmlStr);
