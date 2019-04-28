@@ -217,33 +217,33 @@ export class Node {
     }
   }
 
-  // insertElement
-  public insertElement(newNode: Node, index: number): Node {
+  // insertAt
+  public insertAt(node: Node, index: number): Node {
     const children = this.children || [];
-    children.splice(index, 0, newNode);
 
-    if (newNode.parentNode) {
-      newNode.parentNode.removeChild(newNode);
-    }
-    newNode.parentNode = this;
-    this.children = children;
-    return newNode;
-  }
-
-  // children operate
-  public appendChild(node: Node): Node {
     let newNodes: Node[] = [];
     if (['document', 'fragment'].includes(node.nodeType)) {
-      newNodes = node.children || [];
+      newNodes = [...(node.children || [])];
     } else {
       newNodes.push(node);
     }
 
-    newNodes.forEach(item => {
-      const index = this.children ? this.children.length : 0;
-      this.insertElement(item, index);
+    newNodes.forEach((newNode, i) => {
+      if (newNode.parentNode) {
+        newNode.parentNode.removeChild(newNode);
+      }
+      children.splice(index + i, 0, newNode);
+      newNode.parentNode = this;
     });
 
+    this.children = children;
+    return node;
+  }
+
+  // children operate
+  public appendChild(node: Node): Node {
+    const index = this.children ? this.children.length : 0;
+    this.insertAt(node, index);
     return node;
   }
 
@@ -251,7 +251,7 @@ export class Node {
   public insertBefore(newNode: Node, referenceNode: Node): Node {
     const index = (this.children || []).indexOf(referenceNode);
     if (index !== -1) {
-      this.insertElement(newNode, index);
+      this.insertAt(newNode, index);
       return newNode;
     } else {
       throw new Error('insertBefore: referenceNode is not node children.');
@@ -269,7 +269,7 @@ export class Node {
   public insertAfter(newNode: Node, referenceNode: Node): Node {
     const index = (this.children || []).indexOf(referenceNode);
     if (index !== -1) {
-      this.insertElement(newNode, index + 1);
+      this.insertAt(newNode, index + 1);
       return newNode;
     } else {
       throw new Error('insertAfter: referenceNode is not node children.');
@@ -283,9 +283,14 @@ export class Node {
    * @memberof Node
    */
   public before(...nodes: Node[]) {
-    const fragment = this.createFragment();
-    fragment.children = nodes;
-    this.parentNode!.insertBefore(fragment, this);
+    const parentNode = this.parentNode; // store parentNode;
+    if (nodes.includes(this)) {
+      throw new Error('before: Can not move node before self');
+    }
+    nodes.forEach((node, i) => {
+      const index = parentNode!.children!.indexOf(this); // maybe index change
+      parentNode!.insertAt(node, index);
+    });
   }
 
   /**
@@ -295,9 +300,14 @@ export class Node {
    * @memberof Node
    */
   public after(...nodes: Node[]) {
-    const fragment = this.createFragment();
-    fragment.children = nodes;
-    this.parentNode!.insertAfter(fragment, this);
+    const parentNode = this.parentNode; // store parentNode;
+    if (nodes.includes(this)) {
+      throw new Error('after: Can not move node after self');
+    }
+    nodes.forEach((node, i) => {
+      const index = parentNode!.children!.indexOf(this); // maybe index change
+      parentNode!.insertAt(node, index + i + 1);
+    });
   }
 
   /**
@@ -319,7 +329,7 @@ export class Node {
 
   // replaceWith
   public replaceWith(node: Node): void {
-    if (this.parentNode) {
+    if (this.parentNode && node !== this) {
       this.parentNode.insertBefore(node, this);
       this.remove();
     }

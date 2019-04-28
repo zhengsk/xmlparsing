@@ -2,7 +2,14 @@ import { Tokenizer } from './tokenizer';
 import { Document, Node, Text, Comment, Cdata, Element } from './node';
 
 // parse
-function parse(xmlStr: string): Document {
+function parse(
+  xmlStr: string,
+  options: {
+    plainTextNodes?: string[];
+    checkElementName?: () => void;
+    checkAttributeName?: () => void;
+  } = {}
+): Document {
   // ast
   const ast = new Document({
     value: 'docuement',
@@ -15,50 +22,53 @@ function parse(xmlStr: string): Document {
   const elementStack: Node[] = [];
   let currentElement: Node = ast;
 
-  const tokenizer = new Tokenizer(xmlStr, {
-    text(stats) {
-      // skip whitespace text node.
-      if (/^[\s]+$/.test(stats.value!)) {
-        return false;
+  const tokenizer = new Tokenizer(
+    {
+      text(stats) {
+        // skip whitespace text node.
+        if (/^[\s]+$/.test(stats.value!)) {
+          return false;
+        }
+        currentElement.appendChild(new Text(stats));
+      },
+
+      comment(stats) {
+        currentElement.appendChild(new Comment(stats));
+      },
+
+      cdata(stats) {
+        currentElement.appendChild(new Cdata(stats));
+      },
+
+      elementOpen(stats) {
+        elementStack.push(currentElement);
+        currentElement = currentElement.appendChild(new Element(stats));
+      },
+
+      attribute(stats) {
+        currentElement.setAttribute(stats.name!, stats.value!);
+      },
+
+      elementClose(stats) {
+        if (stats.selfClosing) {
+          currentElement.selfClosing = true;
+        }
+        currentElement = elementStack.pop()!;
+        // console.info(ast);
+      },
+
+      end() {
+        // console.info(ast);
+      },
+
+      error(stats, err) {
+        debugger; // tslint:disable-line
       }
-      currentElement.appendChild(new Text(stats));
     },
+    options
+  );
 
-    comment(stats) {
-      currentElement.appendChild(new Comment(stats));
-    },
-
-    cdata(stats) {
-      currentElement.appendChild(new Cdata(stats));
-    },
-
-    elementOpen(stats) {
-      elementStack.push(currentElement);
-      currentElement = currentElement.appendChild(new Element(stats));
-    },
-
-    attribute(stats) {
-      currentElement.setAttribute(stats.name!, stats.value!);
-    },
-
-    elementClose(stats) {
-      if (stats.selfClosing) {
-        currentElement.selfClosing = true;
-      }
-      currentElement = elementStack.pop()!;
-      // console.info(ast);
-    },
-
-    end() {
-      // console.info(ast);
-    },
-
-    error(stats, err) {
-      debugger; // tslint:disable-line
-    }
-  });
-
-  tokenizer.parse();
+  tokenizer.parse(xmlStr);
 
   return ast;
 }
