@@ -229,10 +229,10 @@ export class Node {
     }
 
     newNodes.forEach((newNode, i) => {
-      children.splice(index + i, 0, newNode);
-      if (newNode.parentNode) {
+      if (newNode.parentNode && newNode.parentNode !== this) {
         newNode.parentNode.removeChild(newNode);
       }
+      children.splice(index + i, 0, newNode);
       newNode.parentNode = this;
     });
 
