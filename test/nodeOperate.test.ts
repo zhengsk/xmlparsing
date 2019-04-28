@@ -1,6 +1,5 @@
 import { expect } from 'chai';
 import { describe, it } from 'mocha';
-import { Tokenizer } from '../src/tokenizer';
 
 import { Document, Element, Node } from '../src/node';
 import parser from '../src/parser';

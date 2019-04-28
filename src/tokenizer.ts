@@ -53,7 +53,7 @@ export class Tokenizer {
   private state: State = State.text;
   private maxIndex: number = 0;
 
-  private textNode: string[] = ['script', 'style'];
+  private plainTextNodes: string[] = [];
 
   private events: Events;
 
@@ -62,9 +62,30 @@ export class Tokenizer {
   private attributeName: string = ''; // store attribute name waiting for attribute value
   private error?: Error;
 
-  constructor(str: string, events: Events) {
-    this.str = str;
+  private checkElementName(elemName: string): boolean {
+    if (/^[a-zA-Z$-][\w-$:]*$/.test(elemName)) {
+      return true;
+    }
+    return false;
+  }
+
+  private checkAttributeName(attrName: string): boolean {
+    if (/^[a-zA-Z$_\-:][\w-$:]*$/.test(attrName)) {
+      return true;
+    }
+    return false;
+  }
+
+  constructor(
+    events: Events,
+    options: {
+      plainTextNodes?: string[];
+      checkElementName?: () => void;
+      checkAttributeName?: () => void;
+    } = {}
+  ) {
     this.events = events;
+    Object.assign(this, options);
   }
 
   private emit(
@@ -137,15 +158,17 @@ export class Tokenizer {
   }
 
   private checkElemName(elemName: string): boolean {
-    if (/^[a-zA-Z$-][\w-$:]*$/.test(elemName)) {
-      return true;
+    const result = this.checkElementName(elemName);
+    if (result) {
+      return result;
     }
     throw new Error('Invalid element name!');
   }
 
-  private checkAttrName(elemName: string) {
-    if (/^[a-zA-Z$_\-:][\w-$:]*$/.test(elemName)) {
-      return true;
+  private checkAttrName(attrName: string) {
+    const result = this.checkAttributeName(attrName);
+    if (result) {
+      return result;
     }
     throw new Error('Invalid attribute name!');
   }
@@ -462,7 +485,7 @@ export class Tokenizer {
 
     // TextNode
     const element = this.elemStack[this.elemStack.length - 1];
-    if (this.textNode.includes(element)) {
+    if (this.plainTextNodes.includes(element)) {
       this.current = char;
       const reg = new RegExp(`<\\s*/\\s*${element}\\s*>$`);
       while (!reg.test(this.current) && this.index < this.maxIndex) {
@@ -521,7 +544,9 @@ export class Tokenizer {
   }
 
   // parse
-  public parse(): void {
+  public parse(xmlStr: string): void {
+    this.str = xmlStr;
+
     try {
       this.maxIndex = this.str.length - 1;
       while (this.index < this.maxIndex) {

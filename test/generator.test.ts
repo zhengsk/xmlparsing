@@ -1,6 +1,5 @@
 import { expect } from 'chai';
 import { describe, it } from 'mocha';
-import { Tokenizer } from '../src/tokenizer';
 
 import { Document } from '../src/node';
 import parser from '../src/parser';
@@ -162,13 +161,13 @@ describe('Generator', () => {
 
   itCase({
     title: 'style ',
-    sourceStr: '<style id="33">console.infoasdf<a""sd>sad</a></style>',
-    targetStr: '<style id="33">console.infoasdf<a""sd>sad</a></style>'
+    sourceStr: '<style id="33">console.infoasdf<a""sd>sad</aw></style>',
+    targetStr: '<style id="33">console.infoasdf<a""sd>sad</aw></style>'
   });
 
   itCase({
     title: 'script ',
-    sourceStr: '<script type="texts">console.info("<a""sd>sad</a>")</script>',
-    targetStr: '<script type="texts">console.info("<a""sd>sad</a>")</script>'
+    sourceStr: '<script type="texts">console.info("<a""sd>sad</aww>")</script>',
+    targetStr: '<script type="texts">console.info("<a""sd>sad</aww>")</script>'
   });
 });
