@@ -148,8 +148,8 @@ describe('Node operate', () => {
 
   it('Node: insertAt after', () => {
     const opts = {
-      sourceStr: '<abc b="ab"><a>text</a><mn />xx</abc>',
-      targetStr: '<abc b="ab"><mn/><a>text</a>xx</abc>'
+      sourceStr: '<abc b="ab"><a>text</a><mn/>xx</abc>',
+      targetStr: '<abc b="ab"><a>text</a><mn/>xx</abc>'
     };
 
     const doc: Document = parser.parse(opts.sourceStr);
@@ -201,6 +201,22 @@ describe('Node operate', () => {
     expect(newXmlStr).eq(opts.targetStr);
   });
 
+  it('Node: before self', () => {
+    const opts = {
+      sourceStr: '<a1/><a2/><a3/><a4/>',
+      targetStr: '<a4/><a2/><a1/><a3/>'
+    };
+
+    const doc: Document = parser.parse(opts.sourceStr);
+    const a1 = doc.getElementsByTagName('a1')[0];
+    const a2 = doc.getElementsByTagName('a2')[0];
+    const a3 = doc.getElementsByTagName('a3')[0];
+    const a4 = doc.getElementsByTagName('a4')[0];
+    a2.before(a4, a2, a1);
+    const newXmlStr: string = generator.generate(doc);
+    expect(newXmlStr).eq(opts.targetStr);
+  });
+
   it('Node: after', () => {
     const opts = {
       sourceStr: '<abc b="ab"></abc>',
@@ -210,6 +226,22 @@ describe('Node operate', () => {
     const doc: Document = parser.parse(opts.sourceStr);
     const abcElem = doc.getElementsByTagName('abc')[0];
     abcElem.after(doc.createElement('a'), doc.createTextNode('text'));
+    const newXmlStr: string = generator.generate(doc);
+    expect(newXmlStr).eq(opts.targetStr);
+  });
+
+  it('Node: after self', () => {
+    const opts = {
+      sourceStr: '<a1/><a2/><a3/><a4/>',
+      targetStr: '<a3/><a2/><a4/><a1/>'
+    };
+
+    const doc: Document = parser.parse(opts.sourceStr);
+    const a1 = doc.getElementsByTagName('a1')[0];
+    const a2 = doc.getElementsByTagName('a2')[0];
+    const a3 = doc.getElementsByTagName('a3')[0];
+    const a4 = doc.getElementsByTagName('a4')[0];
+    a3.after(a2, a4, a1);
     const newXmlStr: string = generator.generate(doc);
     expect(newXmlStr).eq(opts.targetStr);
   });
