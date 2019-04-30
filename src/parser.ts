@@ -11,13 +11,7 @@ function parse(
   } = {}
 ): Document {
   // ast
-  const ast = new Document({
-    value: 'docuement',
-    index: 0,
-    startIndex: 0,
-    column: 1,
-    row: 1
-  });
+  const ast = new Document({});
 
   const elementStack: Node[] = [];
   let currentElement: Node = ast;

@@ -1,4 +1,5 @@
 export interface EventValue {
+  [index: string]: any;
   index?: number;
   startIndex?: number;
   column?: number;
