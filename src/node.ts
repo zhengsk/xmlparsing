@@ -154,12 +154,19 @@ export class Node {
   public children: Node[] | undefined;
   public parentNode?: Node | null;
 
-  public selfClosing?: boolean;
   public stats: EventValue;
 
   constructor(type: NodeType, stats: EventValue) {
     this.nodeType = type;
     this.stats = stats;
+  }
+
+  public get selfClosing(): boolean {
+    return this.stats.selfClosing ? true : false;
+  }
+
+  public set selfClosing(isClosing: boolean) {
+    this.stats.selfClosing = isClosing;
   }
 
   // firstChild
@@ -376,7 +383,7 @@ export class Node {
 
     // "document" | "element" | "text" | "comment" | "cdata" | "fragment"
     if (nodeType === 'document') {
-      newNode = new Document({});
+      newNode = new Document();
     } else if (nodeType === 'element') {
       newNode = new Element(stats);
     } else if (nodeType === 'text') {
@@ -530,7 +537,7 @@ export class Node {
   }
 
   public createFragment() {
-    return new Fragment({});
+    return new Fragment();
   }
 }
 
@@ -570,14 +577,14 @@ export class Element extends Node {
 
 // Document Node
 export class Document extends Node {
-  constructor(stats: EventValue) {
+  constructor(stats: EventValue = {}) {
     super('document', stats);
   }
 }
 
 // Fragment Node
 export class Fragment extends Node {
-  constructor(stats: EventValue) {
+  constructor(stats: EventValue = {}) {
     super('fragment', stats);
   }
 }

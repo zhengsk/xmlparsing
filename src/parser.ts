@@ -48,7 +48,6 @@ function parse(
           currentElement.selfClosing = true;
         }
         currentElement = elementStack.pop()!;
-        // console.info(ast);
       },
 
       end() {

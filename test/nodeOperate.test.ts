@@ -460,14 +460,14 @@ describe('Node operate', () => {
     expect(doc.outerXML).eq('<hello>abc<br/></hello>');
   });
 
-  // it('Node: cloneNode', () => {
-  //   const opts = {
-  //     sourceStr: '<hello><world><a x="33"/><!--comment text--></world></hello>',
-  //     targetStr: '<hello><world><a x="33"/><!--comment text--></world></hello>'
-  //   };
+  it('Node: cloneNode', () => {
+    const opts = {
+      sourceStr: '<hello><world><a x="33"/><!--comment text--></world></hello>',
+      targetStr: '<hello><world><a x="33"/><!--comment text--></world></hello>'
+    };
 
-  //   const doc: Document = parser.parse(opts.sourceStr);
-  //   const newDoc = doc.cloneNode(true);
-  //   expect(newDoc.outerXML).eq(doc.outerXML);
-  // });
+    const doc: Document = parser.parse(opts.sourceStr);
+    const newDoc = doc.cloneNode(true);
+    expect(newDoc.outerXML).eq(doc.outerXML);
+  });
 });
