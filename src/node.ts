@@ -155,7 +155,7 @@ export class Node {
   public parentNode?: Node | null;
 
   public selfClosing?: boolean;
-  public stats?: EventValue;
+  public stats: EventValue;
 
   constructor(type: NodeType, stats: EventValue) {
     this.nodeType = type;
@@ -364,8 +364,46 @@ export class Node {
 
   // clone
   public cloneNode(deep: boolean = false): Node {
-    // @TODO: implement
-    return this;
+    const nodeType: NodeType = this.nodeType;
+    let newNode: Node;
+
+    const stats: EventValue = {};
+    if (this.stats) {
+      Object.entries(this.stats).forEach(([key, value]) => {
+        stats[key] = value;
+      });
+    }
+
+    // "document" | "element" | "text" | "comment" | "cdata" | "fragment"
+    if (nodeType === 'document') {
+      newNode = new Document({});
+    } else if (nodeType === 'element') {
+      newNode = new Element(stats);
+    } else if (nodeType === 'text') {
+      newNode = new Text(stats);
+    } else if (nodeType === 'comment') {
+      newNode = new Comment(stats);
+    } else if (nodeType === 'cdata') {
+      newNode = new Cdata(stats);
+    } else if (nodeType === 'fragment') {
+      newNode = new Fragment(stats);
+    } else {
+      throw new Error('Unknow nodeType');
+    }
+
+    if (this.attributes) {
+      this.attributes.forEach(attribute => {
+        newNode.setAttribute(attribute.key, attribute.value);
+      });
+    }
+
+    if (deep && this.children) {
+      newNode.children = this.children.map(child => {
+        return child.cloneNode(true);
+      });
+    }
+
+    return newNode;
   }
 
   // toString
@@ -492,7 +530,7 @@ export class Node {
   }
 
   public createFragment() {
-    return new Fragment();
+    return new Fragment({});
   }
 }
 
@@ -539,7 +577,7 @@ export class Document extends Node {
 
 // Fragment Node
 export class Fragment extends Node {
-  constructor() {
-    super('fragment', {});
+  constructor(stats: EventValue) {
+    super('fragment', stats);
   }
 }
