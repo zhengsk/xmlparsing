@@ -26,7 +26,7 @@ function formatStr(indent: number = 0) {
 function elementStringify(element: Node) {
   let result: string = '';
 
-  // document
+  // document or fragment
   if (element.nodeType === 'document' || element.nodeType === 'fragment') {
     if (element.children && element.children!.length) {
       element.children!.forEach(elem => {
@@ -93,8 +93,6 @@ function elementStringify(element: Node) {
     } else {
       result += formatStr() + `</${(element as Element).tagName}>`;
     }
-
-    return result;
   }
 
   // text

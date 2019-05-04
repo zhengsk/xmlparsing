@@ -94,6 +94,20 @@ describe('Node operate', () => {
     expect(newXmlStr).eq(opts.targetStr);
   });
 
+  it('Attribute: setKey and setValue', () => {
+    const opts = {
+      sourceStr: '<abc b="ab"></abc>',
+      targetStr: '<abc aaa="aabb"></abc>'
+    };
+
+    const doc: Document = parser.parse(opts.sourceStr);
+    const attr = doc.firstChild!.attributes!.get('b');
+    attr!.setKey('aaa');
+    attr!.setValue('aabb');
+    const newXmlStr: string = generator.generate(doc);
+    expect(newXmlStr).eq(opts.targetStr);
+  });
+
   it('Node: traverse', () => {
     const opts = {
       sourceStr: '<abc b="ab"><a/><b/><c/><d><e/></d></abc>'
@@ -462,8 +476,8 @@ describe('Node operate', () => {
 
   it('Node: cloneNode', () => {
     const opts = {
-      sourceStr: '<hello><world><a x="33"/><!--comment text--></world></hello>',
-      targetStr: '<hello><world><a x="33"/><!--comment text--></world></hello>'
+      sourceStr: `<hello><world><a x="33" y='11'/><!--comment text--></world>abc<![CDATA[adbb]]></hello>`,
+      targetStr: `<hello><world><a x="33" y='11'/><!--comment text--></world>abc<![CDATA[adbb]]></hello>`
     };
 
     const doc: Document = parser.parse(opts.sourceStr);
