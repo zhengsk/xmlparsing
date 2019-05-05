@@ -485,7 +485,7 @@ describe('Node operate', () => {
     expect(newDoc.outerXML).eq(doc.outerXML);
   });
 
-  it('Node: elementName Error', () => {
+  it('Node: element name Error', () => {
     const opts = {
       sourceStr: `<h?ea></h?ea>`
     };
@@ -493,6 +493,28 @@ describe('Node operate', () => {
       parser.parse(opts.sourceStr);
     } catch (err) {
       expect(err.error.message).to.equal('Invalid element name!');
+    }
+  });
+
+  it('Node: attribute name Error', () => {
+    const opts = {
+      sourceStr: `<hea w:e?e = '99'></hea>`
+    };
+    try {
+      parser.parse(opts.sourceStr);
+    } catch (err) {
+      expect(err.error.message).to.equal('Invalid attribute name!');
+    }
+  });
+
+  it('Node: attribute value Error', () => {
+    const opts = {
+      sourceStr: `<hea abx=></hea>`
+    };
+    try {
+      parser.parse(opts.sourceStr, { attributeValueWithoutQuotes: false });
+    } catch (err) {
+      expect(err.error.message).to.equal('Invalid attribute value!');
     }
   });
 });

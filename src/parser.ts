@@ -6,6 +6,7 @@ function parse(
   xmlStr: string,
   options: {
     plainTextNodes?: string[];
+    attributeValueWithoutQuotes?: boolean;
     checkElementName?: () => void;
     checkAttributeName?: () => void;
   } = {}
