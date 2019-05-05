@@ -55,7 +55,10 @@ function parse(
       },
 
       error(stats, err) {
-        debugger; // tslint:disable-line
+        throw {
+          error: err,
+          stats
+        };
       }
     },
     options

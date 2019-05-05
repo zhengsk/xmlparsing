@@ -484,4 +484,15 @@ describe('Node operate', () => {
     const newDoc = doc.cloneNode(true);
     expect(newDoc.outerXML).eq(doc.outerXML);
   });
+
+  it('Node: elementName Error', () => {
+    const opts = {
+      sourceStr: `<h?ea></h?ea>`
+    };
+    try {
+      parser.parse(opts.sourceStr);
+    } catch (err) {
+      expect(err.error.message).to.equal('Invalid element name!');
+    }
+  });
 });
