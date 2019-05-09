@@ -273,6 +273,22 @@ describe('Node operate', () => {
     expect(newXmlStr).eq(opts.targetStr);
   });
 
+  it('Node: removeChild Error', () => {
+    const opts = {
+      sourceStr: '<abc b="ab"></abc><a>text</a>',
+    };
+
+    const doc: Document = parser.parse(opts.sourceStr);
+    const abcElem = doc.firstChild;
+    const aElem = doc.lastChild;
+    try {
+      abcElem!.removeChild(aElem!);
+    } catch (err) {
+      expect(err.message).eq('removeChild: the node is not a child of this node.');
+    }
+
+  });
+
   it('Node: remove', () => {
     const opts = {
       sourceStr: '<abc b="ab"><a>text</a><x/></abc>',
