@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { describe, it } from 'mocha';
 
-import { Document, Element, Node } from '../src/node';
+import { Document, Element, Node, Fragment } from '../src/node';
 import parser from '../src/parser';
 import generator from '../src/generator';
 
@@ -499,6 +499,17 @@ describe('Node operate', () => {
     const doc: Document = parser.parse(opts.sourceStr);
     const newDoc = doc.cloneNode(true);
     expect(newDoc.outerXML).eq(doc.outerXML);
+  });
+
+  it('Node: cloneNode Fragment', () => {
+    const fragmentElem = new Fragment();
+    const hello = new Element({
+      value: 'hello'
+    });
+    fragmentElem.appendChild(hello);
+
+    const newFragmentElem = fragmentElem.cloneNode(true);
+    expect(newFragmentElem.outerXML).eq('<hello></hello>');
   });
 
   it('Node: element name Error', () => {
