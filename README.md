@@ -44,27 +44,62 @@ generator.generate(xmlDocument); // <hello class="green"></hello>
 
 ### nodeType
 
-### nodeValue
+类型：string
 
-### children
+节点类型：document、element、fragment、text、comment、cdata 类型
+
+
+### nodeValue string | null
+
+类型：string | null
+
+节点值：Text节点、Comment节点、Cdata节点的文本内容，其他节点的nodeValue为null
+
+
+### children [Node]
+
+所有子节点数组
+
 
 ### parentNode
 
+父节点
+
 ### previousSibling
+
+前一个兄弟节点
 
 ### previousElementSibling
 
+前一个兄弟元素节点
+
 ### nextSibling
+
+后一个兄弟节点
+
 
 ### nextElementSibling
 
+后一个兄弟元素节点
+
+
 ### firstChild
+
+第一个子节点
+
 
 ### lastChild
 
+最后一个子节点
+
+
 ### outerXML
 
+节点字符串文本
+
 ### innerXML
+
+所有子节点的字符串文本
 
 ## 方法
 
