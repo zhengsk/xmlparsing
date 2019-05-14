@@ -103,9 +103,27 @@ generator.generate(xmlDocument); // <hello class="green"></hello>
 
 ## 方法
 
-### getAttribute
+### getAttribute(attributName)
+说明：获取属性值
 
-### setAttribute
+参数：attributeName 属性名
+
+```js
+// <div class="hello" />
+node.getAttribute('class'); // 'hello'
+```
+
+### setAttribute(attributeName, newValue)
+说明： 设置属性值
+
+参数： attributeName 属性名， newValue 属性值
+
+```js
+// <div class="hello" />
+node.getAttribute('class', 'green');
+node.getAttribute('id', 'abc');
+// <div class="green" id="abc"></div>
+```
 
 ### removeAttribute
 
