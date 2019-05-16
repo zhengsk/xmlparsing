@@ -114,6 +114,7 @@ node.getAttribute('class'); // 'hello'
 ```
 
 ### setAttribute(attributeName, newValue)
+
 说明： 设置属性值
 
 参数： attributeName 属性名， newValue 属性值
@@ -121,13 +122,33 @@ node.getAttribute('class'); // 'hello'
 ```js
 // <div class="hello" />
 node.getAttribute('class', 'green');
-node.getAttribute('id', 'abc');
-// <div class="green" id="abc"></div>
+node.getAttribute('id', 'abc'); // <div class="green" id="abc"></div>
+
 ```
 
-### removeAttribute
+### removeAttribute(attributeName)
+
+说明： 删除节点属性
+
+参数： attributeName
+
+```js
+// <div class="hello" />
+node.removeAttribute('class');
+node.getAttribute('id', 'abc'); // <div></div>
+```
 
 ### hasAttribute
+
+说明： 判断节点是否有纯在的属性
+
+参数： attributeName
+
+```js
+// <div class="hello" />
+node.removeAttribute('class');
+node.getAttribute('id', 'abc'); // <div></div>
+```
 
 ### appendChild
 
