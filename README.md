@@ -150,7 +150,18 @@ node.removeAttribute('class');
 node.getAttribute('id', 'abc'); // <div></div>
 ```
 
-### appendChild
+### appendChild(childNode)
+
+说明： 添加子节点
+
+参数： childNode
+
+```js
+// <div class="hello" />
+node.removeAttribute('class');
+const newNode = node.createElement('xyz');
+node.appendChild(newNode); // <div class="hello"><xyz></xyz></div>
+```
 
 ### insertBefore
 
