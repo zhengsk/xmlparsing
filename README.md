@@ -163,32 +163,65 @@ const newNode = node.createElement('xyz');
 node.appendChild(newNode); // <div class="hello"><xyz></xyz></div>
 ```
 
-### insertBefore
+### insertBefore(newNode, referenceNode)
+
+说明： 在参考节点前插入节点
+
+参数： newNode 新节点，referenceNode 参考相关节点
 
 ### insertAfter
 
+说明： 在参考节点后插入节点
+
+
 ### before
+
+说明：在节点前添加新节点
 
 ### after
 
+说明：在节点后添加新节点
+
 ### removeChild
+
+说明：删除子节点
 
 ### replaceWith
 
+说明：用新节点替换节点本身
+
 ### remove
+
+说明：删除节点本身
 
 ### empty
 
+说明：清空节点所有子节点
+
 ### cloneNode
+
+说明：克隆节点本身
 
 ### toString
 
+说明：返回节点字符串序列
+
 ### getElementsByTagName
+
+说明：返回所有指定节点名称的所有子节点
 
 ### createElement
 
+说明：创建新元素节点
+
 ### createComment
+
+说明：创建注释节点
 
 ### createTextNode
 
+说明：创建文本节点
+
 ### createFragment
+
+说明：创建片段节点
