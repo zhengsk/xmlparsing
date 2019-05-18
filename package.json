@@ -9,6 +9,13 @@
     "doc": "typedoc --theme minimal --out docs ./src"
   },
   "author": "zsk526",
+  "keywords": [
+    "xmlparser",
+    "parser",
+    "xml",
+    "ast",
+    "generator"
+  ],
   "files": [
     "build/**/*.js"
   ],
