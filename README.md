@@ -49,7 +49,7 @@ generator.generate(xmlDocument); // <hello class="green"></hello>
 节点类型：document、element、fragment、text、comment、cdata 类型
 
 
-### nodeValue string | null
+### nodeValue
 
 类型：string | null
 
