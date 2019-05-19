@@ -138,7 +138,7 @@ node.removeAttribute('class');
 node.getAttribute('id', 'abc'); // <div></div>
 ```
 
-### hasAttribute
+### hasAttribute(attributName)
 
 说明： 判断节点是否有纯在的属性
 
@@ -174,54 +174,54 @@ node.appendChild(newNode); // <div class="hello"><xyz></xyz></div>
 说明： 在参考节点后插入节点
 
 
-### before
+### before(newNode[, newNode...])
 
 说明：在节点前添加新节点
 
-### after
+### after(newNode[, newNode...])
 
 说明：在节点后添加新节点
 
-### removeChild
+### removeChild(childNode)
 
 说明：删除子节点
 
-### replaceWith
+### replaceWith(newNode)
 
 说明：用新节点替换节点本身
 
-### remove
+### remove()
 
 说明：删除节点本身
 
-### empty
+### empty()
 
 说明：清空节点所有子节点
 
-### cloneNode
+### cloneNode([deep])
 
 说明：克隆节点本身
 
-### toString
+### toString()
 
 说明：返回节点字符串序列
 
-### getElementsByTagName
+### getElementsByTagName(tagName)
 
 说明：返回所有指定节点名称的所有子节点
 
-### createElement
+### createElement(nodeType)
 
 说明：创建新元素节点
 
-### createComment
+### createComment([commentText])
 
 说明：创建注释节点
 
-### createTextNode
+### createTextNode([text])
 
 说明：创建文本节点
 
-### createFragment
+### createFragment()
 
 说明：创建片段节点
