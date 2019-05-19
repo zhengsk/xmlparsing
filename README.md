@@ -169,7 +169,7 @@ node.appendChild(newNode); // <div class="hello"><xyz></xyz></div>
 
 参数： newNode 新节点，referenceNode 参考相关节点
 
-### insertAfter
+### insertAfter(newNode, referenceNode)
 
 说明： 在参考节点后插入节点
 
