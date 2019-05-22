@@ -158,7 +158,6 @@ node.getAttribute('id', 'abc'); // <div></div>
 
 ```js
 // <div class="hello" />
-node.removeAttribute('class');
 const newNode = node.createElement('xyz');
 node.appendChild(newNode); // <div class="hello"><xyz></xyz></div>
 ```
@@ -169,10 +168,23 @@ node.appendChild(newNode); // <div class="hello"><xyz></xyz></div>
 
 参数： newNode 新节点，referenceNode 参考相关节点
 
+```js
+// <div><x /></div>
+const newNode = node.createElement('y');
+node.insertBefore(newNode, node.firstChild); // <div><y></y><x /></div>
+```
+
 ### insertAfter(newNode, referenceNode)
 
 说明： 在参考节点后插入节点
 
+参数： newNode 新节点，referenceNode 参考相关节点
+
+```js
+// <div><x /></div>
+const newNode = node.createElement('y');
+node.insertAfter(newNode, node.firstChild); // <div><x /><y></y></div>
+```
 
 ### before(newNode[, newNode...])
 
