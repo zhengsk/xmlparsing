@@ -207,6 +207,14 @@ node.after(newNode); // <div></div><y></y>
 
 说明：删除子节点
 
+参数： newNode
+
+```js
+// <div><a /><b /></div>
+const newNode = node.removeChild(node.firstChild); <div><b /></div>
+```
+
+
 ### replaceWith(newNode)
 
 说明：用新节点替换节点本身
