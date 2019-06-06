@@ -520,26 +520,26 @@ export class Tokenizer {
 
     // < / >
     if (char === '>') {
-      throw new Error('Empty close element!');
       console.error('Empty close element!');
+      throw new Error('Empty close element!');
     }
 
     this.current = '';
     while (char !== '>' && this.index < this.maxIndex) {
       this.current += char;
-      if (this.checkElemName(this.current)) {
+      if (this.checkElemName(this.current.trim())) {
         char = this.feed();
       }
     }
     const element = this.elemStack.pop();
-    if (element === this.current) {
+    if (element === this.current.trim()) {
       this.emit('elementClose', { element });
       this.state = State.text;
       this.startIndexes.push(this.index);
       return;
     } else {
-      throw new Error('Can not match close element!');
       console.error('Can not match close element!');
+      throw new Error('Can not match close element!');
     }
   }
 

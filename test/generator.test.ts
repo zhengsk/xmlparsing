@@ -172,4 +172,16 @@ describe('Generator', () => {
     sourceStr: '<script type="texts">console.info("<a""sd>sad</aww>")</script>',
     targetStr: '<script type="texts">console.info("<a""sd>sad</aww>")</script>'
   });
+
+  itCase({
+    title: 'end tagName width whitespace',
+    sourceStr: '<abc></abc >',
+    targetStr: '<abc></abc>'
+  });
+
+  itCase({
+    title: 'selfclosing tagName width whitespace',
+    sourceStr: '<abc / >',
+    targetStr: '<abc/>'
+  });
 });
