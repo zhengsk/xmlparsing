@@ -455,6 +455,21 @@ export class Node {
     }
   }
 
+  // 获取节点文本字符串
+  get innerText(): string {
+    let result: string = '';
+    if (this.children) {
+      this.children.forEach(elem => {
+        if (elem.nodeType === 'text') {
+          return (result += elem.nodeValue);
+        } else {
+          return (result += elem.innerText);
+        }
+      });
+    }
+    return result;
+  }
+
   // previousSibling
   get previousSibling(): Node | null {
     let node = null;

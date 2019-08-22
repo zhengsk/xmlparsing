@@ -275,7 +275,7 @@ describe('Node operate', () => {
 
   it('Node: removeChild Error', () => {
     const opts = {
-      sourceStr: '<abc b="ab"></abc><a>text</a>',
+      sourceStr: '<abc b="ab"></abc><a>text</a>'
     };
 
     const doc: Document = parser.parse(opts.sourceStr);
@@ -284,9 +284,10 @@ describe('Node operate', () => {
     try {
       abcElem!.removeChild(aElem!);
     } catch (err) {
-      expect(err.message).eq('removeChild: the node is not a child of this node.');
+      expect(err.message).eq(
+        'removeChild: the node is not a child of this node.'
+      );
     }
-
   });
 
   it('Node: remove', () => {
@@ -474,6 +475,33 @@ describe('Node operate', () => {
     doc.innerXML = '<abc x="33"/>';
     const newXmlStr = doc.toString();
     expect(newXmlStr).eq(opts.targetStr);
+  });
+
+  it('Node: innerText', () => {
+    const opts = {
+      sourceStr: `
+<pre><code class="lang-js hljs raw">getServerTime(){
+    my.getServerTime({
+      <span class="hljs-attr">success</span>: <span class="hljs-function">(<span class="hljs-params">res</span>) =></span> {
+        my.alert({
+          <span class="hljs-attr">title</span>: res.time, 
+        });
+      },
+    });
+  }</code></pre>`,
+      targetStr: `getServerTime(){
+    my.getServerTime({
+      success: (res) => {
+        my.alert({
+          title: res.time, 
+        });
+      },
+    });
+  }`
+    };
+
+    const doc: Document = parser.parse(opts.sourceStr);
+    expect(doc.innerText).eq(opts.targetStr);
   });
 
   it('Node: outerXML', () => {
