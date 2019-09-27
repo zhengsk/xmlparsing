@@ -916,11 +916,144 @@ img { max-width: 100%; }
 		<div class="tsd-panel tsd-typography">
 			<h1 id="xmlparsing">xmlparsing</h1>
 			<blockquote>
-				<p>A parser for parse xml.</p>
+				<p>XML 解析器，支持布尔属性、自结束标签元素、保持元素属性。</p>
 			</blockquote>
-			<blockquote>
-				<p>Support boolean attribute、self-closing element、keep attribute value order.</p>
-			</blockquote>
+			<h2 id="-">安装</h2>
+			<pre><code class="language-shell">npm i xmlparsing</code></pre>
+			<h2 id="-">使用</h2>
+			<pre><code class="language-js"><span class="hljs-keyword">import</span> { parser, generator } <span class="hljs-keyword">from</span> <span class="hljs-string">'xmlparsing'</span>;
+
+<span class="hljs-comment">// parse</span>
+<span class="hljs-keyword">const</span> xmlDocument = parser.parse(<span class="hljs-string">'&lt;hello class="red"&gt;&lt;/hello&gt;'</span>);
+
+<span class="hljs-comment">// firstChild</span>
+<span class="hljs-keyword">const</span> helloElement = xmlDocument.firstChild;
+
+<span class="hljs-comment">// tagName</span>
+<span class="hljs-built_in">console</span>.info(helloElement.tagName); <span class="hljs-comment">// hello</span>
+
+<span class="hljs-comment">// getAttribute</span>
+<span class="hljs-built_in">console</span>.info(helloElement.getAttribute(<span class="hljs-string">'class'</span>)); <span class="hljs-comment">// red;</span>
+
+helloElement.setAttribute(<span class="hljs-string">'class'</span>, <span class="hljs-string">'green'</span>);
+
+<span class="hljs-comment">// generate</span>
+generator.generate(xmlDocument); <span class="hljs-comment">// &lt;hello class="green"&gt;&lt;/hello&gt;</span></code></pre>
+			<h2 id="-">元素类型</h2>
+			<ul>
+				<li>Document</li>
+				<li>Element</li>
+				<li>Fragment</li>
+				<li>Text</li>
+				<li>Comment</li>
+				<li>Cdata</li>
+			</ul>
+			<h2 id="-">属性</h2>
+			<h3 id="nodetype">nodeType</h3>
+			<p>类型：string</p>
+			<p>节点类型：document、element、fragment、text、comment、cdata 类型</p>
+			<h3 id="nodevalue">nodeValue</h3>
+			<p>类型：string | null</p>
+			<p>节点值：Text 节点、Comment 节点、Cdata 节点的文本内容，其他节点的 nodeValue 为 null</p>
+			<h3 id="children-node-">children [Node]</h3>
+			<p>所有子节点数组</p>
+			<h3 id="parentnode">parentNode</h3>
+			<p>父节点</p>
+			<h3 id="previoussibling">previousSibling</h3>
+			<p>前一个兄弟节点</p>
+			<h3 id="previouselementsibling">previousElementSibling</h3>
+			<p>前一个兄弟元素节点</p>
+			<h3 id="nextsibling">nextSibling</h3>
+			<p>后一个兄弟节点</p>
+			<h3 id="nextelementsibling">nextElementSibling</h3>
+			<p>后一个兄弟元素节点</p>
+			<h3 id="firstchild">firstChild</h3>
+			<p>第一个子节点</p>
+			<h3 id="lastchild">lastChild</h3>
+			<p>最后一个子节点</p>
+			<h3 id="outerxml">outerXML</h3>
+			<p>节点字符串文本</p>
+			<h3 id="innerxml">innerXML</h3>
+			<p>所有子节点的字符串文本</p>
+			<h2 id="-">方法</h2>
+			<h3 id="getattribute-attributname-">getAttribute(attributName)</h3>
+			<p>说明：获取属性值</p>
+			<p>参数：attributeName 属性名</p>
+			<pre><code class="language-js"><span class="hljs-comment">// &lt;div class="hello" /&gt;</span>
+node.getAttribute(<span class="hljs-string">'class'</span>); <span class="hljs-comment">// 'hello'</span></code></pre>
+			<h3 id="setattribute-attributename-newvalue-">setAttribute(attributeName, newValue)</h3>
+			<p>说明： 设置属性值</p>
+			<p>参数： attributeName 属性名， newValue 属性值</p>
+			<pre><code class="language-js"><span class="hljs-comment">// &lt;div class="hello" /&gt;</span>
+node.getAttribute(<span class="hljs-string">'class'</span>, <span class="hljs-string">'green'</span>);
+node.getAttribute(<span class="hljs-string">'id'</span>, <span class="hljs-string">'abc'</span>); <span class="hljs-comment">// &lt;div class="green" id="abc"&gt;&lt;/div&gt;</span></code></pre>
+			<h3 id="removeattribute-attributename-">removeAttribute(attributeName)</h3>
+			<p>说明： 删除节点属性</p>
+			<p>参数： attributeName</p>
+			<pre><code class="language-js"><span class="hljs-comment">// &lt;div class="hello" /&gt;</span>
+node.removeAttribute(<span class="hljs-string">'class'</span>);
+node.getAttribute(<span class="hljs-string">'id'</span>, <span class="hljs-string">'abc'</span>); <span class="hljs-comment">// &lt;div&gt;&lt;/div&gt;</span></code></pre>
+			<h3 id="hasattribute-attributname-">hasAttribute(attributName)</h3>
+			<p>说明： 判断节点是否有纯在的属性</p>
+			<p>参数： attributeName</p>
+			<pre><code class="language-js"><span class="hljs-comment">// &lt;div class="hello" /&gt;</span>
+node.removeAttribute(<span class="hljs-string">'class'</span>);
+node.getAttribute(<span class="hljs-string">'id'</span>, <span class="hljs-string">'abc'</span>); <span class="hljs-comment">// &lt;div&gt;&lt;/div&gt;</span></code></pre>
+			<h3 id="appendchild-childnode-">appendChild(childNode)</h3>
+			<p>说明： 添加子节点</p>
+			<p>参数： childNode</p>
+			<pre><code class="language-js"><span class="hljs-comment">// &lt;div class="hello" /&gt;</span>
+<span class="hljs-keyword">const</span> newNode = node.createElement(<span class="hljs-string">'xyz'</span>);
+node.appendChild(newNode); <span class="hljs-comment">// &lt;div class="hello"&gt;&lt;xyz&gt;&lt;/xyz&gt;&lt;/div&gt;</span></code></pre>
+			<h3 id="insertbefore-newnode-referencenode-">insertBefore(newNode, referenceNode)</h3>
+			<p>说明： 在参考节点前插入节点</p>
+			<p>参数： newNode 新节点，referenceNode 参考相关节点</p>
+			<pre><code class="language-js"><span class="hljs-comment">// &lt;div&gt;&lt;x /&gt;&lt;/div&gt;</span>
+<span class="hljs-keyword">const</span> newNode = node.createElement(<span class="hljs-string">'y'</span>);
+node.insertBefore(newNode, node.firstChild); <span class="hljs-comment">// &lt;div&gt;&lt;y&gt;&lt;/y&gt;&lt;x /&gt;&lt;/div&gt;</span></code></pre>
+			<h3 id="insertafter-newnode-referencenode-">insertAfter(newNode, referenceNode)</h3>
+			<p>说明： 在参考节点后插入节点</p>
+			<p>参数： newNode 新节点，referenceNode 参考相关节点</p>
+			<pre><code class="language-js"><span class="hljs-comment">// &lt;div&gt;&lt;x /&gt;&lt;/div&gt;</span>
+<span class="hljs-keyword">const</span> newNode = node.createElement(<span class="hljs-string">'y'</span>);
+node.insertAfter(newNode, node.firstChild); <span class="hljs-comment">// &lt;div&gt;&lt;x /&gt;&lt;y&gt;&lt;/y&gt;&lt;/div&gt;</span></code></pre>
+			<h3 id="before-newnode-newnode-">before(newNode[, newNode...])</h3>
+			<p>说明：在节点前添加新节点</p>
+			<p>参数： newNode</p>
+			<pre><code class="language-js"><span class="hljs-comment">// &lt;div&gt;&lt;/div&gt;</span>
+<span class="hljs-keyword">const</span> newNode = node.createElement(<span class="hljs-string">'y'</span>);
+node.before(newNode); <span class="hljs-comment">// &lt;y&gt;&lt;/y&gt;&lt;div&gt;&lt;/div&gt;</span></code></pre>
+			<h3 id="after-newnode-newnode-">after(newNode[, newNode...])</h3>
+			<p>说明：在节点后添加新节点</p>
+			<p>参数： newNode</p>
+			<pre><code class="language-js"><span class="hljs-comment">// &lt;div&gt;&lt;/div&gt;</span>
+<span class="hljs-keyword">const</span> newNode = node.createElement(<span class="hljs-string">'y'</span>);
+node.after(newNode); <span class="hljs-comment">// &lt;div&gt;&lt;/div&gt;&lt;y&gt;&lt;/y&gt;</span></code></pre>
+			<h3 id="removechild-childnode-">removeChild(childNode)</h3>
+			<p>说明：删除子节点</p>
+			<p>参数： newNode</p>
+			<pre><code class="language-js"><span class="hljs-comment">// &lt;div&gt;&lt;a /&gt;&lt;b /&gt;&lt;/div&gt;</span>
+<span class="hljs-keyword">const</span> newNode = node.removeChild(node.firstChild); <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">b</span> /&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span></code></pre>
+			<h3 id="replacewith-newnode-">replaceWith(newNode)</h3>
+			<p>说明：用新节点替换节点本身</p>
+			<h3 id="remove-">remove()</h3>
+			<p>说明：删除节点本身</p>
+			<h3 id="empty-">empty()</h3>
+			<p>说明：清空节点所有子节点</p>
+			<h3 id="clonenode-deep-">cloneNode([deep])</h3>
+			<p>说明：克隆节点本身</p>
+			<h3 id="tostring-">toString()</h3>
+			<p>说明：返回节点字符串序列</p>
+			<h3 id="getelementsbytagname-tagname-">getElementsByTagName(tagName)</h3>
+			<p>说明：返回所有指定节点名称的所有子节点</p>
+			<h3 id="createelement-nodetype-">createElement(nodeType)</h3>
+			<p>说明：创建新元素节点</p>
+			<h3 id="createcomment-commenttext-">createComment([commentText])</h3>
+			<p>说明：创建注释节点</p>
+			<h3 id="createtextnode-text-">createTextNode([text])</h3>
+			<p>说明：创建文本节点</p>
+			<h3 id="createfragment-">createFragment()</h3>
+			<p>说明：创建片段节点</p>
 		</div>
 		<div style="position:relative;"><a name="typedoc-main-index" class="tsd-anchor"></a></div>
 		<section class="tsd-panel-group tsd-index-group">

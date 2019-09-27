@@ -6,6 +6,7 @@ function parse(
   xmlStr: string,
   options: {
     plainTextNodes?: string[];
+    ignoreWhitespace?: boolean;
     attributeValueWithoutQuotes?: boolean;
     checkElementName?: () => void;
     checkAttributeName?: () => void;
@@ -20,10 +21,6 @@ function parse(
   const tokenizer = new Tokenizer(
     {
       text(stats) {
-        // skip whitespace text node.
-        if (/^[\s]+$/.test(stats.value!)) {
-          return false;
-        }
         currentElement.appendChild(new Text(stats));
       },
 

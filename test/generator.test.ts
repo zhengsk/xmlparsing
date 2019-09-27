@@ -17,12 +17,17 @@ function itCase(
   } = {
     format: false,
     attributeNewline: false
+  },
+  parserOpts: {
+    plainTextNodes?: string[];
+    ignoreWhitespace?: boolean;
+  } = {
+    plainTextNodes: ['style', 'script'],
+    ignoreWhitespace: true
   }
 ) {
   it(opts.title, () => {
-    const ast: Document = parser.parse(opts.sourceStr, {
-      plainTextNodes: ['style', 'script']
-    });
+    const ast: Document = parser.parse(opts.sourceStr, parserOpts);
     const newXmlStr: string = generator.generate(ast, generateOpts);
 
     expect(newXmlStr).eq(opts.targetStr);
@@ -184,4 +189,17 @@ describe('Generator', () => {
     sourceStr: '<abc / >',
     targetStr: '<abc/>'
   });
+
+  // ignoreWhitespace
+  itCase(
+    {
+      title: 'ignoreWhitespace false to keep',
+      sourceStr: '<abc/> <dee/> ',
+      targetStr: '<abc/> <dee/> '
+    },
+    undefined,
+    {
+      ignoreWhitespace: false
+    }
+  );
 });

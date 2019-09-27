@@ -55,6 +55,8 @@ export class Tokenizer {
 
   private plainTextNodes: string[] = [];
 
+  private ignoreWhitespace: boolean = true;
+
   private events: Events;
 
   private attributeValueWithoutQuotes: boolean = true;
@@ -80,6 +82,7 @@ export class Tokenizer {
     events: Events,
     options: {
       plainTextNodes?: string[];
+      ignoreWhitespace?: boolean;
       checkElementName?: () => void;
       checkAttributeName?: () => void;
     } = {}
@@ -216,7 +219,10 @@ export class Tokenizer {
       }
     }
 
-    if (this.current.length) {
+    if (
+      this.current.length &&
+      (!this.ignoreWhitespace || !/^[\s]+$/.test(this.current)) // 是否跳过空白字符
+    ) {
       this.emit('text');
     }
 

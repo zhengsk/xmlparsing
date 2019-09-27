@@ -935,19 +935,39 @@ img { max-width: 100%; }
 				<a name="parse" class="tsd-anchor"></a>
 				<h3>parse</h3>
 				<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported">
-					<li class="tsd-signature tsd-kind-icon">parse<span class="tsd-signature-symbol">(</span>xmlStr<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../classes/_node_.document.html" class="tsd-signature-type">Document</a></li>
+					<li class="tsd-signature tsd-kind-icon">parse<span class="tsd-signature-symbol">(</span>xmlStr<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, options<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">object</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../classes/_node_.document.html" class="tsd-signature-type">Document</a></li>
 				</ul>
 				<ul class="tsd-descriptions">
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/zhengsk/xmlparsing/blob/7a74056/src/parser.ts#L5">parser.ts:5</a></li>
+								<li>Defined in <a href="https://github.com/zhengsk/xmlparsing/blob/6b74721/src/parser.ts#L5">parser.ts:5</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
 						<ul class="tsd-parameters">
 							<li>
 								<h5>xmlStr: <span class="tsd-signature-type">string</span></h5>
+							</li>
+							<li>
+								<h5><span class="tsd-flag ts-flagDefault value">Default value</span> options: <span class="tsd-signature-type">object</span><span class="tsd-signature-symbol"> =&nbsp;{}</span></h5>
+								<ul class="tsd-parameters">
+									<li class="tsd-parameter">
+										<h5><span class="tsd-flag ts-flagOptional">Optional</span> attribute<wbr>Value<wbr>Without<wbr>Quotes<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">false</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">true</span></h5>
+									</li>
+									<li class="tsd-parameter">
+										<h5><span class="tsd-flag ts-flagOptional">Optional</span> check<wbr>Attribute<wbr>Name<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">function</span></h5>
+									</li>
+									<li class="tsd-parameter">
+										<h5><span class="tsd-flag ts-flagOptional">Optional</span> check<wbr>Element<wbr>Name<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">function</span></h5>
+									</li>
+									<li class="tsd-parameter">
+										<h5><span class="tsd-flag ts-flagOptional">Optional</span> ignore<wbr>Whitespace<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">false</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">true</span></h5>
+									</li>
+									<li class="tsd-parameter">
+										<h5><span class="tsd-flag ts-flagOptional">Optional</span> plain<wbr>Text<wbr>Nodes<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></h5>
+									</li>
+								</ul>
 							</li>
 						</ul>
 						<h4 class="tsd-returns-title">Returns <a href="../classes/_node_.document.html" class="tsd-signature-type">Document</a></h4>
