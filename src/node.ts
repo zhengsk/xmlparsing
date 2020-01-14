@@ -455,19 +455,37 @@ export class Node {
     }
   }
 
-  // 获取节点文本字符串
-  get innerText(): string {
-    let result: string = '';
+  // 拍平的文档节点数组
+  public flatElement(result: Node[] = []): Node[] {
     if (this.children) {
       this.children.forEach(elem => {
-        if (elem.nodeType === 'text') {
-          return (result += elem.nodeValue);
-        } else {
-          return (result += elem.innerText);
-        }
+        result.push(elem);
+        elem.flatElement(result);
       });
     }
     return result;
+  }
+
+  // 文本数组
+  get textArray(): string[] {
+    let result: string[] = [];
+    const flatElement = this.flatElement();
+    flatElement.forEach(elem => {
+      if (elem.nodeType === 'text' && elem.nodeValue) {
+        return result.push(elem.nodeValue);
+      }
+    });
+    return result;
+  }
+
+  // 获取节点文本字符串
+  get innerText(): string {
+    return this.textArray.join(' ');
+  }
+
+  // 不带格式化的纯文本
+  get textContent(): string {
+    return this.textArray.join('');
   }
 
   // previousSibling

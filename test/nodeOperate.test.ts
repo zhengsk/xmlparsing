@@ -479,6 +479,16 @@ describe('Node operate', () => {
 
   it('Node: innerText', () => {
     const opts = {
+      sourceStr: '<hello>xxx<a x="33"/>abc</hello>',
+      targetStr: 'xxx abc'
+    };
+
+    const doc: Document = parser.parse(opts.sourceStr);
+    expect(doc.innerText).eq(opts.targetStr);
+  });
+
+  it('Node: textContent', () => {
+    const opts = {
       sourceStr: `
 <pre><code class="lang-js hljs raw">getServerTime(){
     my.getServerTime({
@@ -501,7 +511,7 @@ describe('Node operate', () => {
     };
 
     const doc: Document = parser.parse(opts.sourceStr);
-    expect(doc.innerText).eq(opts.targetStr);
+    expect(doc.textContent).eq(opts.targetStr);
   });
 
   it('Node: outerXML', () => {
