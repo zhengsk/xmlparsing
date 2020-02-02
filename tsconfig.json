@@ -1,11 +1,7 @@
 {
-  "exclude": [
-    "node_modules",
-  ],
+  "exclude": ["node_modules"],
 
-  "include": [
-    "./src/**/*.ts", "types/tokenizer.d.ts",
-  ],
+  "include": ["./src/**/*.ts", "types/tokenizer.d.ts"],
 
   "compilerOptions": {
     /* Basic Options */

@@ -193,8 +193,8 @@ export class Tokenizer {
 
     if (size < 0) {
       for (let i = -1; i >= size; i--) {
-        this.index -= 1;
         const char = this.str[this.index];
+        this.index -= 1;
         if (this.isLineBreak(char)) {
           this.column = this.rowsLength.pop() || 0;
           --this.row;
